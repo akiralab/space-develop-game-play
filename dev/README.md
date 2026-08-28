@@ -1,5 +1,37 @@
-# 宇宙開発レース — 検証用ビルド（DEV）
+# 宇宙開発レース — ブラウザ版
 
-このディレクトリは動作確認用のビルドです。公開版はこちらを見てください。
+> ⚠️ **これは検証用（DEV）です。** 本番は https://akiralab.github.io/space-develop-game-play/ を見てください。
 
-**▶ https://akiralab.github.io/space-develop-game-play/**
+実在するロケットと地球観測衛星の**実データ**で遊ぶカードゲーム。
+10年間で「地球への貢献度」を最も多く稼いだ人の勝ち。
+
+**▶ 遊ぶ: https://akiralab.github.io/space-develop-game-play/dev/**
+
+- あなた1人 vs CPU3体。サーバ不要で、ブラウザだけで動きます
+- 券面の数値はすべて実機の諸元。遊ぶうちに「どの課題にどの衛星が効くか」が分かります
+
+## URL オプション
+
+| URL | 内容 |
+|---|---|
+| `?title=1&gate=1` | クリックで開始（音声が確実に鳴る） |
+| `?rules=1` | ルール解説 8シーン |
+| `?fx=none` | 演出を飛ばして盤面から |
+| `?players=2` | 1対1 |
+| `?package=0` | 初期100億（既定は推奨パッケージの300億） |
+| `?seed=933` | 盤面の再現 |
+
+## 環境
+
+| | URL |
+|---|---|
+| 本番 | https://akiralab.github.io/space-develop-game-play/ |
+| 検証（DEV） | https://akiralab.github.io/space-develop-game-play/dev/ |
+
+## これは何のリポジトリか
+
+**配信用のビルド成果物のみ**を置いています。
+ゲームデザイン・シミュレーションによるルール検証・カードジェネレータなどの
+開発リポジトリは別にあります。
+
+素材の出典とライセンスは [CREDITS.md](CREDITS.md) を参照してください。

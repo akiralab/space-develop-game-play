@@ -1,0 +1,303 @@
+/* ==========================================================================
+   mobile.css — スマホ向けの上書き（縦持ちを主軸・横持ちも可）
+   ・PC版の見た目は一切変えない: すべての規則を html:not([data-desktop]) と
+     メディアクエリの配下に置く。?desktop=1 で <html data-desktop> が付き、
+     393px 幅でも従来の2カラムに戻る（index.html <head> のインラインスクリプト）。
+   ・ブレークポイント
+       縦持ち  : (max-width: 700px)
+       横持ち  : (max-width: 960px) and (max-height: 500px)
+   ・セーフエリア: env(safe-area-inset-*)（viewport-fit=cover を前提）
+   ・読み込み順は最後（index.html の <link> 群の末尾）。同じ詳細度なら後勝ち。
+   ========================================================================== */
+:root {
+  --sa-t: env(safe-area-inset-top, 0px);
+  --sa-b: env(safe-area-inset-bottom, 0px);
+  --sa-l: env(safe-area-inset-left, 0px);
+  --sa-r: env(safe-area-inset-right, 0px);
+}
+
+/* ==========================================================================
+   共通（縦持ち・横持ちの両方）: タッチ端末では :hover の浮き上がりが「押した後も残る」
+   ので無効化する。hover:none のポインタ（指）だけが対象で、PC のマウスは影響しない。
+   ========================================================================== */
+@media (hover: none) {
+  html:not([data-desktop]) .cardbox:hover,
+  html:not([data-desktop]) .mtile:hover,
+  html:not([data-desktop]) .atile:hover:not(.off),
+  html:not([data-desktop]) #endturn:hover:not(:disabled),
+  html:not([data-desktop]) #rulesTab:hover,
+  html:not([data-desktop]) #actmodal .op:hover,
+  html:not([data-desktop]) #cardmenu .cmb.dev:not(.off):hover { transform: none; }
+  html:not([data-desktop]) .mtile:hover .art img { transform: none; }
+  html:not([data-desktop]) .mtile .mzoom { opacity: 1; }   /* 「拡大」バッジは常時表示 */
+}
+
+/* ==========================================================================
+   縦持ち（幅 700px 以下）
+   PC の「1画面完結・2カラム」をやめ、縦1列＋縦スクロールにする。
+   手番パネル（#overlay）は画面下に固定するボトムシート。
+   ========================================================================== */
+@media (max-width: 700px) {
+  /* カード縮尺: board.css の高さ別メディアクエリ（:root）より詳細度で勝たせる */
+  html:not([data-desktop]) {
+    --cs: .135;                       /* 816 × .135 ≒ 110px 幅 */
+    --cw: calc(816px * var(--cs));
+    --ch: calc(1110px * var(--cs));
+    --ms: .42;                        /* 拡大モーダル: 816 × .42 ≒ 343px */
+    --sheet-h: 210px;                 /* ボトムシートの想定高さ（本文末尾の余白に使う） */
+  }
+  html:not([data-desktop]) body {
+    height: auto; min-height: 100dvh; overflow: auto; overflow-x: hidden;
+    display: block;
+    padding: calc(6px + var(--sa-t)) calc(8px + var(--sa-r))
+             calc(var(--sheet-h) + 12px + var(--sa-b)) calc(8px + var(--sa-l));
+  }
+  html:not([data-desktop]) body::after { top: 140vh; }
+
+  /* ---- ヘッダ: 2行（ブランド ＋ HUD）に圧縮、右上の音声ボタン(≈44px)だけ避ける ---- */
+  /* 1行目: ブランドだけ（右上の #sdg-mute「🔊 音声ON」≈96px 幅の下に何も置かない）
+     2行目: HUD 4項目 ＋ ルール説明（アイコンのみ） */
+  html:not([data-desktop]) .top {
+    flex-wrap: wrap; gap: 2px 10px; padding: 0 8px 6px 0; margin-bottom: 8px;
+    align-items: center;
+  }
+  html:not([data-desktop]) .top .brand { gap: 6px; min-height: 46px; padding-right: 100px; }
+  html:not([data-desktop]) .top .brand .mk { font-size: 14px; }
+  html:not([data-desktop]) .top h1 { font-size: 14px; letter-spacing: .1em; }
+  html:not([data-desktop]) .top .ver { font-size: 8px; padding: 1px 6px; letter-spacing: .2em; }
+  html:not([data-desktop]) .top .hud { flex: 1 1 auto; order: 3; margin-left: 0; gap: 0; min-width: 0; }
+  html:not([data-desktop]) .top .hd { min-width: 0; flex: 1 1 0; padding: 2px 6px 2px 8px; }
+  html:not([data-desktop]) .top .hd:first-child { border-left: 0; padding-left: 0; }
+  html:not([data-desktop]) .top .hd i { font-size: 8px; letter-spacing: .16em; }
+  html:not([data-desktop]) .top .hd b { font-size: 15px; }
+  html:not([data-desktop]) .top .hd b s { font-size: 9px; }
+  html:not([data-desktop]) #newgame { margin-left: 6px; padding: 5px 8px; font-size: 12px; order: 4; min-height: 32px; }
+  html:not([data-desktop]) #newgame .tx { display: none; }
+  html:not([data-desktop]) #rulesTab { margin-left: 0; padding: 5px 8px; font-size: 12px; order: 5; min-height: 32px; }
+  html:not([data-desktop]) #rulesTab .tx { display: none; }
+  html:not([data-desktop]) #ngpop { right: max(8px, var(--sa-r)); left: max(8px, var(--sa-l)); width: auto; top: calc(96px + var(--sa-t)); }
+  html:not([data-desktop]) .top .ruleset { display: none; }
+
+  /* ---- 1カラム化: .colL/.colR を透過させ、6パネルを order で並べ替える ---- */
+  html:not([data-desktop]) .cols { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  html:not([data-desktop]) .colL, html:not([data-desktop]) .colR { display: contents; }
+  html:not([data-desktop]) .colL > .panel, html:not([data-desktop]) .colR > .panel {
+    flex: 0 0 auto; min-height: 0;
+    min-width: 0; width: 100%; max-width: 100%;   /* 縦flexの子は min-width:auto で見出しの nowrap に押し広げられるので抑える */
+    overflow: visible;                 /* clip でカードの影や中身を切らない */
+  }
+  html:not([data-desktop]) .top { min-width: 0; }
+  html:not([data-desktop]) .colL > .board    { order: 1; }
+  html:not([data-desktop]) #overlay          { order: 2; }
+  html:not([data-desktop]) .colL > .panel:nth-child(3) { order: 3; }   /* 手札 */
+  html:not([data-desktop]) .colL > .fleet    { order: 4; min-height: 0; }
+  html:not([data-desktop]) .colR > .panel:nth-child(2) { order: 5; }   /* 順位 */
+  html:not([data-desktop]) .colR > .logpanel { order: 6; flex: 0 0 auto; }
+  html:not([data-desktop]) #log { flex: 0 0 auto; max-height: 220px; padding-bottom: 8px; }
+  html:not([data-desktop]) h2 .jp { flex: 1 1 auto; }
+
+  /* ---- タブ切替（issue #15/#16）: ヘッダ直下に固定。body[data-mtab] で6パネルを出し分ける ---- */
+  html:not([data-desktop]) #mtabs {
+    display: flex; gap: 6px; position: sticky; top: calc(4px + var(--sa-t)); z-index: 30;
+    margin: 0 0 10px; padding: 4px; border-radius: 12px;
+    background: rgba(19,25,44,.96); border: 1px solid var(--line);
+    box-shadow: 0 8px 24px rgba(0,0,0,.45);
+  }
+  html:not([data-desktop]) #mtabs button {
+    flex: 1 1 0; min-height: 40px; padding: 6px 4px; font-family: inherit; font-size: 13px; font-weight: 800;
+    letter-spacing: .04em; text-align: center; color: var(--dim); background: transparent; border: 0;
+    border-radius: 9px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 4px;
+  }
+  html:not([data-desktop]) #mtabs button.on { color: #1c1608; background: var(--acc); }
+  html:not([data-desktop]) #mtabs button b {
+    font-size: 11px; line-height: 1; padding: 3px 6px; border-radius: 999px;
+    background: rgba(255,255,255,.14); color: inherit;
+  }
+  html:not([data-desktop]) #mtabs button b:empty { display: none; }
+  html:not([data-desktop]) body[data-mtab="board"] .colL > .panel:nth-child(3),
+  html:not([data-desktop]) body[data-mtab="board"] .colL > .fleet,
+  html:not([data-desktop]) body[data-mtab="board"] .colR > .panel:nth-child(2),
+  html:not([data-desktop]) body[data-mtab="board"] .colR > .logpanel,
+  html:not([data-desktop]) body[data-mtab="hand"]  .colL > .board,
+  html:not([data-desktop]) body[data-mtab="hand"]  .colR > .panel:nth-child(2),
+  html:not([data-desktop]) body[data-mtab="hand"]  .colR > .logpanel,
+  html:not([data-desktop]) body[data-mtab="info"]  .colL > .board,
+  html:not([data-desktop]) body[data-mtab="info"]  .colL > .panel:nth-child(3),
+  html:not([data-desktop]) body[data-mtab="info"]  .colL > .fleet { display: none; }
+  html:not([data-desktop]) body[data-mtab="info"] #log { max-height: none; }
+  html:not([data-desktop]) body[data-mtab="hand"] .cardrow { min-height: calc(var(--ch) + 14px); }
+
+  /* ---- 場のミッション: 3枚を縦に積む（文字を読ませる） ---- */
+  html:not([data-desktop]) .missionrow {
+    grid-template-columns: minmax(0, 1fr); gap: 8px; min-height: 0;
+  }
+  html:not([data-desktop]) .missionrow.empty { min-height: 60px; }
+  html:not([data-desktop]) .mtile { min-height: 84px; }
+  html:not([data-desktop]) .mtile .mbody { padding: 12px 10px 8px; }
+  html:not([data-desktop]) .mtile .mfl { display: none; }   /* 説明文はタップ（券面）で読む。3枚を上半分に収める */
+  html:not([data-desktop]) .mtile .mnm { font-size: 13.5px; }
+
+  /* ---- 手札: 横スクロール＋スナップ ---- */
+  html:not([data-desktop]) .cardrow {
+    min-height: calc(var(--ch) + 14px); gap: 8px;
+    overflow-x: auto; overflow-y: hidden;
+    scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
+    scroll-padding-left: 2px; padding: 2px 2px 6px;
+  }
+  html:not([data-desktop]) .cardrow .cardwrap { scroll-snap-align: start; flex: 0 0 auto; }
+  html:not([data-desktop]) #field { flex-wrap: wrap; overflow-x: hidden; scroll-snap-type: none; }
+  html:not([data-desktop]) .cardrow.empty { min-height: 56px; }
+  /* 手札が3枚しか無いと誤解されないよう、薄い誘導文と右端のフェードを出す。一度スクロールしたら薄める */
+  html:not([data-desktop]) #handhint {
+    display: block; text-align: center; font-size: 11px; letter-spacing: .12em; color: var(--dim);
+    opacity: .85; margin: 2px 0 0; transition: opacity .4s;
+  }
+  html:not([data-desktop]) #handhint:empty { display: none; }
+  html:not([data-desktop]) #handhint.seen { opacity: .35; }
+  html:not([data-desktop]) #hand {
+    -webkit-mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 28px), transparent 100%);
+            mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 28px), transparent 100%);
+  }
+
+  /* ---- 手番パネル: ボトムシート ---- */
+  html:not([data-desktop]) #overlay {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+    max-height: 55dvh; overflow-y: auto; -webkit-overflow-scrolling: touch;
+    margin: 0; border-radius: 16px 16px 0 0; border-bottom: 0;
+    padding: 7px calc(10px + var(--sa-r)) calc(8px + var(--sa-b)) calc(10px + var(--sa-l));
+    background: linear-gradient(180deg, rgba(29,37,64,.97), rgba(19,25,44,.99));
+    box-shadow: 0 -12px 40px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.06);
+  }
+  html:not([data-desktop]) #overlay h2 { margin-bottom: 4px; }
+  html:not([data-desktop]) #actions.tiles { gap: 5px; }
+  html:not([data-desktop]) .atile { padding: 5px 8px 4px; }
+  html:not([data-desktop]) .atile .nm { font-size: 12.5px; }
+  html:not([data-desktop]) .atile.off .r2 { display: none; }   /* 理由文は省いて高さを抑える */
+  html:not([data-desktop]) .btncol.foot { margin-top: 6px; flex-direction: row; align-items: center; gap: 6px; }
+  html:not([data-desktop]) #endturn { flex: 1 1 auto; padding: 9px 10px; font-size: 12px; }
+  html:not([data-desktop]) #actions.endpanel { max-height: 32dvh; }
+
+  /* ---- ボトムシートの折りたたみ（index.html の setSheet が .collapsed を付ける） ----
+     畳むと見出し行（YOUR TURN・残りアクション・「アクション ▴」）だけが残り、盤面が広がる。 */
+  html:not([data-desktop]) #overlay h2 { cursor: pointer; align-items: center; margin-bottom: 4px; min-height: 36px; }
+  html:not([data-desktop]) #sheetToggle {
+    display: inline-flex; align-items: center; gap: 4px; margin-left: auto; flex: 0 0 auto;
+    font-family: inherit; font-size: 12px; font-weight: 800; letter-spacing: .04em;
+    color: #1c1608; background: var(--acc); border: 0; border-radius: 999px;
+    padding: 6px 12px; min-height: 32px; text-align: center; cursor: pointer;
+  }
+  html:not([data-desktop]) #sheetToggle i { font-style: normal; font-size: 13px; }
+  html:not([data-desktop]) #overlay.collapsed > :not(h2) { display: none; }
+  html:not([data-desktop]) #overlay.collapsed h2 { margin-bottom: 0; }
+  html:not([data-desktop]) #overlay.collapsed { max-height: none; overflow: hidden; background: #151b2e; }
+  html:not([data-desktop]) body.sheet-collapsed { --sheet-h: 58px; }
+
+  /* ボトムシートに隠れないよう、ナレーターと固定表示は上にずらす／縮める */
+  html:not([data-desktop]) .sdg-nar2 { width: 76px; right: 8px; bottom: calc(var(--sheet-h) + var(--sa-b)); }
+  html:not([data-desktop]) .toast { bottom: calc(var(--sheet-h) + 12px + var(--sa-b)); max-width: 92vw; }
+  html:not([data-desktop]) #sdg-credit { display: none; }
+
+  /* ---- 手札交換の操作行 ---- */
+  html:not([data-desktop]) #exchangeUI .xrow { flex-direction: column; align-items: stretch; gap: 6px; }
+  html:not([data-desktop]) #exchangeUI .xrow button { width: 100%; text-align: center; }
+
+  /* ---- 拡大モーダル: 縦に積む（券面 → 解説） ---- */
+  html:not([data-desktop]) #modal { align-items: flex-start; }
+  html:not([data-desktop]) #modal .mwrap {
+    flex-direction: column; align-items: center; gap: 12px;
+    width: 100%; max-height: 100dvh; overflow-y: auto; -webkit-overflow-scrolling: touch;
+    /* 上端は右上のミュートボタン（#sdg-mute・約44px）を避けて空ける */
+    padding: calc(60px + var(--sa-t)) 12px calc(12px + var(--sa-b));
+  }
+  html:not([data-desktop]) #modal .big { flex: 0 0 auto; }
+  html:not([data-desktop]) #minfo { width: auto; max-width: 100%; max-height: none; flex: 0 0 auto; }
+  /* 閉じるボタン: .mwrap が画面いっぱいで背景をタップできないので、左上に固定で置く
+     （右上はミュートボタン #sdg-mute）。端末の「戻る」でも閉じる（index.html の popstate） */
+  html:not([data-desktop]) #modalclose {
+    display: inline-flex; align-items: center; position: fixed; z-index: 2;
+    left: max(10px, var(--sa-l)); top: calc(10px + var(--sa-t));
+    min-height: 44px; padding: 8px 14px; font-family: inherit; font-size: 13px; font-weight: 800;
+    color: #1c1608; background: var(--acc); border: 0; border-radius: 999px;
+    box-shadow: 0 6px 20px rgba(0,0,0,.5); cursor: pointer;
+  }
+
+  /* ---- 行動の小項目ポップアップ / 手札メニュー ---- */
+  html:not([data-desktop]) #actmodal { padding: 12px; }
+  html:not([data-desktop]) #actmodal .amw { width: 100%; max-height: calc(100dvh - 24px); padding: 16px 14px; }
+  html:not([data-desktop]) #cardmenu { max-width: calc(100vw - 16px); }
+}
+@media (max-width: 380px) {
+  html:not([data-desktop]) { --ms: .36; }
+}
+
+/* ==========================================================================
+   横持ち（幅 960px 以下 かつ 高さ 500px 以下）
+   2カラムは維持し、右カラムを細く・カードを小さくして1画面に収める。
+   ========================================================================== */
+@media (max-width: 960px) and (max-height: 500px) {
+  html:not([data-desktop]) {
+    --cs: .10;
+    --cw: calc(816px * var(--cs));
+    --ch: calc(1110px * var(--cs));
+    --ms: .34;
+  }
+  /* 高さ 390px には「課題3枚＋自艦隊＋手札」が縦に収まらない（PC版は各パネルを縮めて
+     1画面に敷き詰めるが、それだと課題が切れる）。横持ちでは縦スクロールを許し、
+     パネルは縮めない。2カラム構成はそのまま。 */
+  html:not([data-desktop]) body {
+    height: auto; min-height: 100dvh; overflow: auto; overflow-x: hidden;
+    padding: calc(4px + var(--sa-t)) calc(8px + var(--sa-r)) calc(8px + var(--sa-b)) calc(8px + var(--sa-l));
+    gap: 5px;
+  }
+  html:not([data-desktop]) .top { gap: 10px; padding: 0 124px 3px 0; }   /* 右上の音声ボタン(≈96px)を避ける */
+  html:not([data-desktop]) .cols { align-items: start; }
+  html:not([data-desktop]) .colL > .panel, html:not([data-desktop]) .colR > .panel { flex: 0 0 auto; }
+  html:not([data-desktop]) .colR > .logpanel { flex: 0 0 auto; }
+  html:not([data-desktop]) #log { flex: 0 0 auto; max-height: 180px; }
+  /* 自艦隊はカード1段ぶんだけ確保し、機体が増えたら折り返して伸びる（PC版の余白吸収はしない） */
+  html:not([data-desktop]) .colL > .fleet { min-height: 0; }
+  html:not([data-desktop]) #field { min-height: calc(var(--ch) + 14px); }
+  html:not([data-desktop]) .missionrow { min-height: 0; }
+  html:not([data-desktop]) .mtile { min-height: 88px; }
+  html:not([data-desktop]) .top h1 { font-size: 13px; letter-spacing: .1em; }
+  html:not([data-desktop]) .top .brand .mk { font-size: 13px; }
+  html:not([data-desktop]) .top .ver { display: none; }
+  html:not([data-desktop]) .top .hud { gap: 2px; margin-left: 0; }
+  html:not([data-desktop]) .top .hd { min-width: 0; padding: 1px 8px; }
+  html:not([data-desktop]) .top .hd i { font-size: 8px; letter-spacing: .14em; }
+  html:not([data-desktop]) .top .hd b { font-size: 14px; }
+  html:not([data-desktop]) #rulesTab { padding: 4px 8px; font-size: 11px; }
+  html:not([data-desktop]) #rulesTab .tx { display: none; }
+  html:not([data-desktop]) #newgame { padding: 4px 8px; font-size: 11px; }
+  html:not([data-desktop]) #newgame .tx { display: none; }
+  html:not([data-desktop]) #ngpop { right: max(8px, var(--sa-r)); top: calc(48px + var(--sa-t)); }
+  html:not([data-desktop]) .top .ruleset { display: none; }
+  html:not([data-desktop]) #modalclose {
+    display: inline-flex; align-items: center; position: fixed; z-index: 2;
+    left: max(10px, var(--sa-l)); top: calc(8px + var(--sa-t));
+    min-height: 40px; padding: 6px 12px; font-family: inherit; font-size: 12px; font-weight: 800;
+    color: #1c1608; background: var(--acc); border: 0; border-radius: 999px; cursor: pointer;
+  }
+
+  html:not([data-desktop]) .cols { grid-template-columns: minmax(0,1fr) clamp(200px, 32vw, 280px); gap: 6px; }
+  html:not([data-desktop]) .colL, html:not([data-desktop]) .colR { gap: 5px; }
+  html:not([data-desktop]) .panel { padding: 5px 8px 6px; border-radius: 10px; }
+  html:not([data-desktop]) h2 { margin-bottom: 3px; }
+  html:not([data-desktop]) .colL > .fleet { min-height: calc(var(--ch) + 30px); }
+  html:not([data-desktop]) .missionrow { gap: 6px; }
+  html:not([data-desktop]) .mtile .mbody { padding: 10px 8px 5px; }
+  html:not([data-desktop]) .mtile .mnm { font-size: 12px; }
+  html:not([data-desktop]) .mtile .mfl { display: none; }
+  html:not([data-desktop]) .mtile .mzoom { display: none; }   /* 細いタイルでは名前と重なる（タップで拡大できる） */
+  html:not([data-desktop]) .cardrow { -webkit-overflow-scrolling: touch; }
+  html:not([data-desktop]) .atile { padding: 4px 7px 3px; }
+  html:not([data-desktop]) .atile .nm { font-size: 12px; }
+  html:not([data-desktop]) .atile.off .r2 { display: none; }
+  html:not([data-desktop]) #endturn { padding: 7px 10px; font-size: 11.5px; }
+  html:not([data-desktop]) #minfo { width: min(300px, 40vw); padding: 12px 14px; }
+  html:not([data-desktop]) #minfo h3 { font-size: 14px; }
+  html:not([data-desktop]) #minfo .lore { font-size: 12px; line-height: 1.6; }
+  html:not([data-desktop]) #modal .mwrap { gap: 12px; }
+  html:not([data-desktop]) .sdg-nar2 { width: 70px; right: 6px; bottom: 6px; }
+  html:not([data-desktop]) #exchangeUI .xrow { gap: 6px; }
+}
