@@ -2,22 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<script>
-/* モバイル対応のフラグ（CSS が最初のペイントから正しい側を選べるよう <head> で同期的に付ける）
-     ?desktop=1        → <html data-desktop>  … 幅に関係なく従来のPC版レイアウトに固定する逃げ道
-     タッチ主体の端末  → <html data-touch>    … 音声ゲート既定化など JS 側の分岐に使う
-   モバイル用の上書き CSS はすべて assets/mobile.css にあり、html:not([data-desktop]) 配下に置く。 */
-(function () {
-  try {
-    var h = document.documentElement, q = location.search;
-    if (/[?&]desktop=1/.test(q)) h.setAttribute('data-desktop', '');
-    var touch = /[?&]touch=1/.test(q) ||
-      ((navigator.maxTouchPoints || 0) > 0 && matchMedia('(hover: none)').matches);
-    if (touch && !/[?&]touch=0/.test(q)) h.setAttribute('data-touch', '');
-  } catch (_) {}
-})();
-</script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <script>
 /* boot.js — 打上前カウントダウン（初回ロードのローディング画面）
 
@@ -136,8 +121,7 @@
   (doc.head || doc.documentElement).appendChild(st);
 
   /* ------------------------------------------------------------------ DOM
-     head で走るので <body>
-<div id="devbadge">DEV — 検証用</div> はまだ無い。position:fixed なので documentElement の
+     head で走るので <body> はまだ無い。position:fixed なので documentElement の
      直下に置いてもレイアウトには影響しない。.neb は boot.css が後から色を乗せる箱。 */
   var root = doc.createElement('div');
   root.id = 'sdg-boot';
@@ -414,7 +398,13 @@
   #modal .mwrap { display:flex; gap:20px; align-items:stretch; cursor:default; }
   #modal .big { width:490px; height:666px; border-radius:14px; overflow:hidden; flex:0 0 auto; }
   #minfo { width:430px; background:var(--panel); border:1px solid var(--line); border-radius:14px;
-           padding:20px; overflow-y:auto; max-height:666px; }
+           padding:20px; overflow-y:auto; max-height:666px;
+           /* 諸元＋来歴は券面より縦に長い。スクロールバーを常に見える形にしておかないと、
+              「実機の諸元」の途中で切れているのに気づけず、ニュースと来歴まで読まれない。 */
+           scrollbar-width: thin; scrollbar-color:#55618a transparent; }
+  #minfo::-webkit-scrollbar { width:9px; }
+  #minfo::-webkit-scrollbar-track { background:rgba(255,255,255,.05); border-radius:5px; }
+  #minfo::-webkit-scrollbar-thumb { background:#55618a; border-radius:5px; }
   /* 実機の諸元・来歴（card_fx.js が assets/carddoc.json から差し込む） */
   #minfo .dochead { margin:14px 0 6px; font-size:11px; letter-spacing:.18em; color:var(--acc);
                     border-top:1px solid var(--line); padding-top:12px; }
@@ -432,17 +422,6 @@
   #modal iframe { width:816px; height:1110px; border:0; transform:scale(.6); transform-origin:top left; pointer-events:none; }
   .missionrow .since { font-size:11px; color:var(--dim); }
   #overlay { position:sticky; bottom:0; }
-  #sheetToggle { display:none; }              /* スマホ縦持ち専用（mobile.css で表示） */
-  #modalclose { display:none; }               /* 同上 */
-  /* 新規ゲームの確認ポップアップ（ヘッダの🆕ボタン直下） */
-  #ngpop { position:fixed; z-index:320; right:118px; top:52px; width:min(340px, calc(100vw - 24px));
-           background:linear-gradient(180deg,#1a2340,#121829); border:1px solid var(--line);
-           border-radius:12px; padding:12px 14px; box-shadow:0 18px 60px rgba(0,0,0,.7); }
-  #ngpop[hidden] { display:none; }
-  #ngpop .q { font-size:13px; line-height:1.6; color:var(--tx); }
-  #ngpop .bt { display:flex; gap:8px; margin-top:10px; justify-content:flex-end; }
-  #ngpop .bt button { text-align:center; padding:8px 14px; }
-  #ngpop .bt .danger { background:var(--ng); color:#fff; font-weight:800; border-color:transparent; }
   table.rank { width:100%; border-collapse:collapse; font-size:14px; }
   table.rank td, table.rank th { padding:5px 8px; border-bottom:1px solid var(--line); text-align:left; }
   /* ==== 演出（FX） ==== */
@@ -520,6 +499,7 @@
 </style>
 </head>
 <body>
+<div id="devbadge">DEV — 検証用</div>
 <header class="top">
   <div class="brand">
     <span class="mk">🚀</span>
@@ -532,9 +512,6 @@
     <div class="hd gold"><i>SCORE</i><b><span id="score">–</span><s>点</s></b></div>
     <div class="hd"><i>DECK</i><b><span id="deck">–</span><s>枚</s></b></div>
   </div>
-  <button id="newgame" title="現在のゲームを破棄して新しく始めます（確認あり）">
-    <span class="ic">🆕</span><span class="tx">新規ゲーム</span>
-  </button>
   <button id="rulesTab" title="ルール説明をいつでも開けます（Escで戻る）">
     <span class="ic">📖</span><span class="tx">ルール説明</span>
   </button>
@@ -565,13 +542,13 @@
 </div>
 <div class="colR"><!-- 右カラム -->
   <section class="panel" id="overlay">
-    <h2><span class="kick">YOUR TURN</span><span class="jp">あなたの手番</span><span class="note" id="actleft"></span>
-      <button id="sheetToggle" type="button" aria-expanded="true">アクション <i>▾</i></button></h2>
+    <h2><span class="kick">YOUR TURN</span><span class="jp">あなたの手番</span><span class="note" id="actleft"></span></h2>
     <div id="dice"></div>
     <div class="err" id="err"></div>
     <div class="btncol" id="actions"></div>
     <div class="btncol foot">
       <button id="endturn" class="primary">手番を終了（手札補充 → CPUへ）</button>
+      <button id="newgame">🆕 新規ゲームを開始する…</button>
     </div>
   </section>
   <section class="panel">
@@ -585,13 +562,8 @@
 </div>
 </div>
 
-<div id="ngpop" hidden>
-  <div class="q">⚠️ 現在のゲームを破棄して、新しいゲームを始めますか？</div>
-  <div class="bt"><button id="ngYes" class="danger">破棄して開始</button><button id="ngNo">やめる</button></div>
-</div>
 <div id="actmodal"></div>
 <div id="modal"><div class="mwrap" onclick="event.stopPropagation()">
-  <button id="modalclose" type="button" aria-label="閉じる">✕ 盤面に戻る</button>
   <div class="big"><iframe id="modalframe"></iframe></div>
   <div id="minfo"></div>
 </div></div>
@@ -616,7 +588,6 @@
 <link rel="stylesheet" href="assets/cpu_digest.css">
 <link rel="stylesheet" href="assets/avatars.css">
 <link rel="stylesheet" href="assets/launch_fx.css">
-<link rel="stylesheet" href="assets/mobile.css">
 <script>
 /* ==== 拡張フック（演出モジュールはここ経由でのみ本体に触る） ====
    各モジュールは window.SDG.* に登録する。本体側のコードは書き換えない。 */
@@ -656,15 +627,7 @@ function cardBox(kind, slug, subtitle, badge) {
   if (subtitle) { const s = document.createElement('div'); s.className='sub'; s.textContent = subtitle; w.appendChild(s); }
   return {wrap: w, box: b};
 }
-function closeModal() {
-  if ($('modal').style.display === 'none') return;
-  $('modal').style.display = 'none';
-  // モバイルで開いたときは履歴を1つ積んでいる（戻る操作で閉じるため）。ここで巻き戻す
-  if (history.state && history.state.sdgModal) history.back();
-}
-$('modal').onclick = closeModal;
-$('modalclose').onclick = e => { e.stopPropagation(); closeModal(); };
-addEventListener('popstate', () => { if ($('modal').style.display !== 'none') $('modal').style.display = 'none'; });
+$('modal').onclick = () => $('modal').style.display = 'none';
 let META = {};
 fetch('assets/cards_meta.json').then(r => r.json()).then(m => META = m).catch(() => {});
 /* ミッションの適性データ（開幕演出 opening.js と同じ /assets/missions.json を使う） */
@@ -683,11 +646,7 @@ function openModal(kind, slug) {
       `<div class="lore">${m.lore}</div>` +
       (m.credit ? `<div class="credit">画像: ${m.credit}</div>` : '');
   } else { $('minfo').style.display = 'none'; }
-  if ($('modal').style.display !== 'flex' && isMobileLayout()) {
-    try { history.pushState({sdgModal: 1}, ''); } catch (_) {}   // 端末の「戻る」で閉じられる
-  }
   $('modal').style.display = 'flex';
-  $('modal').scrollTop = 0; const mw = $('modal').querySelector('.mwrap'); if (mw) mw.scrollTop = 0;
   sdgHook('onCardClick', kind, slug, m);
 }
 
@@ -971,9 +930,9 @@ function render(s) {
   } else {
     $('endturn').style.display = '';
     $('newgame').style.display = '';
+    resetNewGameConfirm();
     renderActionTiles(s, ac);
   }
-  syncSheet(s);
 
   // 交換UI
   $('exchangeUI').style.display = exchangeMode ? 'block' : 'none';
@@ -1238,17 +1197,10 @@ function openCardMenu(box, hi, kind, slug) {
     `<button type="button" class="cmb zoom"><b>🔍 券面を拡大して見る</b></button>`;
   document.body.appendChild(m);
   const r = box.getBoundingClientRect(), mr = m.getBoundingClientRect();
-  /* スマホ縦持ちでは手番パネル（#overlay）が画面下に固定されたボトムシートになる（mobile.css）。
-     その高さぶんを「使える下端」から差し引き、メニューがシートの下に潜らないようにする。 */
-  const ov = $('overlay');
-  const sheetH = (ov && getComputedStyle(ov).position === 'fixed') ? ov.getBoundingClientRect().height : 0;
-  const vw = window.innerWidth, vh = window.innerHeight - sheetH;
   let left = r.left + r.width / 2 - mr.width / 2;
-  left = Math.max(8, Math.min(left, vw - mr.width - 8));
-  let top = r.top - mr.height - 8;                                  // まずカードの上
-  if (top < 8) top = r.bottom + 8;                                  // 入らなければ下
-  if (top + mr.height > vh - 8) top = vh - mr.height - 8;           // それでも溢れるなら下端に寄せる
-  top = Math.max(8, top);                                           // 上端は必ず画面内
+  left = Math.max(8, Math.min(left, window.innerWidth - mr.width - 8));
+  let top = r.top - mr.height - 8;
+  if (top < 8) top = Math.min(r.bottom + 8, window.innerHeight - mr.height - 8);
   m.style.left = Math.round(left) + 'px';
   m.style.top = Math.round(top) + 'px';
   m.classList.add('on');
@@ -1272,46 +1224,29 @@ $('doExchange').onclick = () => {
 };
 $('cancelExchange').onclick = () => { exchangeMode = false; picked = new Set(); render(S); };
 $('endturn').onclick = () => { exchangeMode = false; picked = new Set(); post('/end_turn'); };
-/* 新規ゲーム: ヘッダの🆕 → 確認ポップアップ → 実行 */
-function resetNewGameConfirm() { $('ngpop').hidden = true; }
+let ngConfirm = null;
+function resetNewGameConfirm() {
+  if (ngConfirm) { clearTimeout(ngConfirm); ngConfirm = null; }
+  const b = $('newgame');
+  b.textContent = '🆕 新規ゲームを開始する…';
+  b.style.color = 'var(--dim)'; b.style.borderColor = 'var(--line)';
+}
 /* ヘッダの「ルール説明」タブ。ゲーム中いつでも開ける。閉じるとそのまま盤面に戻る
    （引数なしで呼ぶと rules.js の onDone が null になり、ゲームは開始されない）。 */
 $('rulesTab').onclick = () => { if (window.SDG.showRules) window.SDG.showRules(); };
 
-$('newgame').onclick = e => { e.stopPropagation(); $('ngpop').hidden = !$('ngpop').hidden; };
-$('ngNo').onclick = resetNewGameConfirm;
-$('ngYes').onclick = () => {
-  resetNewGameConfirm();
-  exchangeMode = false; picked = new Set();
-  post('/new_game');
+$('newgame').onclick = () => {
+  const b = $('newgame');
+  if (ngConfirm) {           // 2度目のクリック → 実行
+    resetNewGameConfirm();
+    exchangeMode = false; picked = new Set();
+    post('/new_game');
+    return;
+  }
+  b.textContent = '⚠️ 現在のゲームを破棄します。もう一度クリックで実行（5秒で取消）';
+  b.style.color = 'var(--ng)'; b.style.borderColor = 'var(--ng)';
+  ngConfirm = setTimeout(resetNewGameConfirm, 5000);
 };
-addEventListener('click', e => { if (!$('ngpop').hidden && !e.target.closest('#ngpop,#newgame')) resetNewGameConfirm(); });
-addEventListener('keydown', e => { if (e.key === 'Escape') resetNewGameConfirm(); });
-
-/* ---- スマホ縦持ち: 手番パネル（ボトムシート）の折りたたみ ----
-   既定は畳んだ状態（見出し＋残りアクションだけ）で盤面を広く見せる。
-   自分の手番が来たとき（YEAR が進んだとき）とエラー表示時は自動で開く。 */
-function isMobileLayout() {
-  return !document.documentElement.hasAttribute('data-desktop') && matchMedia('(max-width: 700px)').matches;
-}
-let sheetOpen = true, sheetTurnKey = null;
-function setSheet(open) {
-  sheetOpen = !!open;
-  $('overlay').classList.toggle('collapsed', !sheetOpen);
-  document.body.classList.toggle('sheet-collapsed', !sheetOpen);
-  $('sheetToggle').setAttribute('aria-expanded', String(sheetOpen));
-  $('sheetToggle').querySelector('i').textContent = sheetOpen ? '▾' : '▴';
-}
-$('sheetToggle').onclick = e => { e.stopPropagation(); setSheet(!sheetOpen); };
-$('overlay').querySelector('h2').onclick = () => { if (isMobileLayout()) setSheet(!sheetOpen); };
-function syncSheet(s) {
-  if (!isMobileLayout()) { if (!sheetOpen) setSheet(true); return; }
-  const key = `${s.turn}:${s.phase}`;
-  if (sheetTurnKey === null) { sheetTurnKey = key; setSheet(s.phase === 'over'); return; }   // 初回は畳む
-  if (key !== sheetTurnKey) { sheetTurnKey = key; setSheet(true); return; }                 // 手番が来た／終局
-  if (s.error) setSheet(true);                                                              // 理由を見せる
-}
-$('endturn').addEventListener('click', () => { if (isMobileLayout()) setSheet(false); });
 
 </script>
 <!-- 演出モジュール（各issueは自分のファイルだけを触る＝並行開発で衝突しない） -->
