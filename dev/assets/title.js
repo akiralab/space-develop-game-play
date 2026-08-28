@@ -11,19 +11,22 @@
      ページロード直後は Chrome の自動再生ポリシーで音が鳴らない（NotAllowedError）。
      先に1クリックもらってから演出を始めれば、効果音とナレーションが確実に鳴る。
      既定（gate なし）の挙動は変えていない。 */
+  const touch = document.documentElement.hasAttribute('data-touch');
   function gateThen(start) {
     const g = document.createElement('div');
     g.id = 'sdg-gate';
     g.innerHTML = `<div class="gwrap">
         <div class="gk">SPACE DEVELOPMENT RACE</div>
         <div class="gb">▶</div>
-        <div class="gt">クリックして開始</div>
+        <div class="gt">${touch ? 'タップして開始' : 'クリックして開始'}</div>
         <div class="gs">音声が再生されます</div>
       </div>`;
     document.body.appendChild(g);
     g.onclick = () => {
       // 無音を1回鳴らして自動再生ロックを外してから本編へ
       try { const a = new Audio(); a.volume = 0; const pr = a.play(); if (pr && pr.catch) pr.catch(() => {}); } catch (_) {}
+      // 同じユーザー操作の中で SE の複製元もまとめて解錠する（iOS は要素ごとに解錠が要る）
+      try { if (window.SDG.sfx && window.SDG.sfx.unlock) window.SDG.sfx.unlock(); } catch (_) {}
       g.classList.add('out');
       setTimeout(() => {
         g.remove();
@@ -50,7 +53,10 @@
       </div>
     </div>
     <div class="skip">クリックで開始　/　Esc でルール説明をスキップ</div>`;
-  if (params.has('gate')) {
+  /* タッチ端末（<html data-touch>）では既定でゲートを出す。iOS は操作なしに音を出せないため。
+     ?gate=0 で無効化、?gate=1 で PC でも強制。 */
+  const gate = params.has('gate') ? params.get('gate') !== '0' : touch;
+  if (gate) {
     el.style.display = 'none';
     gateThen(() => { el.style.display = ''; el.classList.add('replay'); });
   }

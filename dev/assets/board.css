@@ -30,7 +30,7 @@
 /* ---------------------------------------------------------------- 土台 */
 html { height: 100%; }
 body {
-  height: 100vh; overflow: hidden;
+  height: 100vh; height: 100dvh; overflow: hidden;
   padding: 9px 14px 8px;
   display: flex; flex-direction: column; gap: 8px;
   font-size: 13px;
