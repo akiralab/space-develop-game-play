@@ -1,0 +1,211 @@
+/* launch_fx.css — 打ち上げ成功の祝福演出（launch_fx.js の見た目）
+   ============================================================================
+   このゲームで一番大きな成功体験は「打ち上げ成功」。従来は #cine のロケットが
+   飛んで終わりで、得点は盤面のカウンタが静かに増えるだけだった。ここでは
+   「判定 → 祝福 → 獲得ポイント」を一続きの1カットにする。
+
+   レイヤ順（既存に割り込まないための約束）
+     #fxroot            100    盤面の小演出
+     #cine              200    既存の打ち上げシネマ（index.html）
+     #sdg-lfx           240    ← ここ。#cine の上、字幕より下
+     #sdg-end / #sdg-title  940-980
+     #sdg-caption      1200    字幕は必ず最前面に残す（音が出せない会場対策）
+
+   配色は board.css / index.html のトークンに揃える。
+     --bg #0d1220  --panel #161d31  --acc #f2c14e  --ok #4caf82  --ng #e05d5d
+     ロケット #e0685f  衛星 #5b9bd5
+   ========================================================================== */
+
+#sdg-lfx {
+  position: fixed; inset: 0; z-index: 240;
+  display: none; align-items: center; justify-content: center;
+  /* クリックは下の #cine に通す（既存のスキップ操作を殺さないため）。
+     スキップ検出は launch_fx.js が document の pointerdown で拾う。 */
+  pointer-events: none;
+  font-family: "Hiragino Sans", "Noto Sans JP", sans-serif;
+  contain: layout paint;
+}
+#sdg-lfx.on { display: flex; }
+#sdg-lfx.out { animation: lfxOut .26s ease-in forwards; }
+@keyframes lfxOut { to { opacity: 0; transform: scale(1.03); } }
+
+/* ------------------------------------------------------------------ 背景光 */
+/* 成功の瞬間に画面全体が一度だけ金色に持ち上がる。#cine のロケット上昇が
+   透けて見える程度の濃さに留める（完全に隠すと打ち上げの爽快感が消える）。 */
+#sdg-lfx .lfx-glow {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(46% 46% at 50% 50%, rgba(242,193,78,.34) 0%, rgba(242,193,78,.10) 42%, rgba(13,18,32,0) 70%),
+    radial-gradient(120% 90% at 50% 50%, rgba(6,10,22,.62) 0%, rgba(6,10,22,.30) 55%, rgba(6,10,22,0) 100%);
+  opacity: 0;
+  animation: lfxGlow 1.5s ease-out forwards;
+}
+@keyframes lfxGlow {
+  0%   { opacity: 0; transform: scale(.72); }
+  14%  { opacity: 1; transform: scale(1.04); }
+  100% { opacity: .82; transform: scale(1); }
+}
+
+/* 放射状の光条。ゆっくり回して「祝福」の質感を出す。 */
+#sdg-lfx .lfx-rays {
+  position: absolute; left: 50%; top: 50%; width: 150vmax; height: 150vmax;
+  transform: translate(-50%, -50%);
+  background: repeating-conic-gradient(from 0deg,
+      rgba(242,193,78,.13) 0deg 4deg, rgba(242,193,78,0) 4deg 15deg);
+  mask-image: radial-gradient(closest-side, #000 6%, rgba(0,0,0,.55) 30%, transparent 62%);
+  -webkit-mask-image: radial-gradient(closest-side, #000 6%, rgba(0,0,0,.55) 30%, transparent 62%);
+  opacity: 0;
+  animation: lfxRays 2.6s linear forwards;
+}
+@keyframes lfxRays {
+  0%   { opacity: 0; transform: translate(-50%, -50%) rotate(0deg) scale(.6); }
+  16%  { opacity: 1; }
+  100% { opacity: .55; transform: translate(-50%, -50%) rotate(26deg) scale(1); }
+}
+
+/* 衝撃波のリング（判定確定の一発）。 */
+#sdg-lfx .lfx-ring {
+  position: absolute; left: 50%; top: 50%; width: 240px; height: 240px;
+  margin: -120px 0 0 -120px; border-radius: 50%;
+  border: 3px solid rgba(242,193,78,.85);
+  opacity: 0;
+  animation: lfxRing .9s cubic-bezier(.16,.8,.3,1) forwards;
+}
+#sdg-lfx .lfx-ring.d2 { animation-delay: .13s; border-color: rgba(91,155,213,.75); }
+@keyframes lfxRing {
+  0%   { opacity: .95; transform: scale(.2); border-width: 6px; }
+  100% { opacity: 0;   transform: scale(3.2); border-width: 1px; }
+}
+
+/* -------------------------------------------------------------------- カード */
+#sdg-lfx .lfx-card {
+  position: relative; text-align: center;
+  min-width: 340px; padding: 22px 52px 20px;
+  border-radius: 20px;
+  background: linear-gradient(180deg, rgba(29,37,64,.95), rgba(13,18,32,.96));
+  border: 1px solid rgba(242,193,78,.45);
+  box-shadow: 0 26px 90px rgba(0,0,0,.66),
+              inset 0 1px 0 rgba(255,255,255,.06),
+              0 0 78px rgba(242,193,78,.20);
+  animation: lfxPop .52s cubic-bezier(.18,1.1,.32,1) forwards;
+}
+@keyframes lfxPop {
+  0%   { opacity: 0; transform: scale(.78) translateY(14px); }
+  58%  { opacity: 1; transform: scale(1.045) translateY(0); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+#sdg-lfx .lfx-kicker {
+  font-size: 11px; letter-spacing: .3em; text-transform: uppercase;
+  color: rgba(242,193,78,.82); margin-bottom: 6px;
+}
+#sdg-lfx .lfx-title {
+  font-size: 62px; line-height: 1.05; font-weight: 800; letter-spacing: .01em;
+  background: linear-gradient(180deg, #fff5d8 0%, #f2c14e 48%, #d99a25 100%);
+  -webkit-background-clip: text; background-clip: text;
+  color: transparent; -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 4px 18px rgba(242,193,78,.45));
+}
+#sdg-lfx .lfx-sub {
+  margin-top: 2px; font-size: 19px; font-weight: 700; color: #e8ecf8;
+  letter-spacing: .06em;
+}
+#sdg-lfx .lfx-badge {
+  display: none; margin: 8px auto 0; width: fit-content;
+  padding: 4px 14px; border-radius: 999px;
+  font-size: 12px; font-weight: 800; letter-spacing: .16em;
+  color: #cfe6ff; background: rgba(91,155,213,.16); border: 1px solid rgba(91,155,213,.55);
+}
+#sdg-lfx.dual .lfx-badge { display: block; animation: lfxBadge .5s .18s backwards ease-out; }
+@keyframes lfxBadge { from { opacity: 0; transform: translateY(-6px) scale(.9); } }
+#sdg-lfx.dual .lfx-card { border-color: rgba(242,193,78,.62);
+  box-shadow: 0 26px 100px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.07),
+              0 0 96px rgba(242,193,78,.30), 0 0 130px rgba(91,155,213,.20); }
+#sdg-lfx.dual .lfx-title { font-size: 70px; }
+
+/* -------------------------------------------------------------- 獲得ポイント */
+#sdg-lfx .lfx-pts {
+  margin-top: 12px; padding-top: 12px;
+  border-top: 1px solid rgba(150,190,255,.16);
+  display: flex; align-items: baseline; justify-content: center; gap: 6px;
+  animation: lfxPts .4s .30s backwards ease-out;
+}
+@keyframes lfxPts { from { opacity: 0; transform: translateY(8px); } }
+#sdg-lfx .lfx-pts .plus { font-size: 30px; font-weight: 800; color: var(--acc, #f2c14e); }
+#sdg-lfx .lfx-pts .n {
+  font-size: 56px; font-weight: 800; line-height: 1; color: var(--acc, #f2c14e);
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 26px rgba(242,193,78,.55);
+  transition: transform .12s ease-out;
+}
+#sdg-lfx .lfx-pts .n.tick { transform: scale(1.12); }
+#sdg-lfx .lfx-pts .u { font-size: 20px; font-weight: 700; color: #e8ecf8; }
+#sdg-lfx .lfx-note { margin-top: 5px; font-size: 12px; color: #96a0c0; letter-spacing: .12em; }
+/* 得点にならなかった成功（場の課題に合う衛星がなかった場合） */
+#sdg-lfx.nopts .lfx-pts .plus, #sdg-lfx.nopts .lfx-pts .u { display: none; }
+#sdg-lfx.nopts .lfx-pts .n { font-size: 22px; font-weight: 700; color: #cfe6ff;
+  text-shadow: none; letter-spacing: .1em; }
+
+/* ---------------------------------------------------------------- 紙吹雪 */
+#sdg-lfx .lfx-confetti { position: absolute; inset: 0; overflow: hidden; }
+#sdg-lfx .lfx-confetti i {
+  position: absolute; left: 50%; top: 50%;
+  width: 8px; height: 13px; border-radius: 2px;
+  background: var(--c, #f2c14e); opacity: 0;
+  animation: lfxBurst var(--dur, 1.2s) cubic-bezier(.12,.72,.28,1) var(--d, 0s) forwards;
+}
+#sdg-lfx .lfx-confetti i.dot { width: 6px; height: 6px; border-radius: 50%; }
+@keyframes lfxBurst {
+  0%   { opacity: 0; transform: translate(-50%, -50%) rotate(0deg) scale(.35); }
+  12%  { opacity: 1; }
+  70%  { opacity: 1; }
+  100% { opacity: 0;
+         transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy)))
+                    rotate(var(--rot, 360deg)) scale(1); }
+}
+
+/* 祝福カードを出しているあいだ、既存シネマ（#cine）の判定テキストは伏せる。
+   同じ「打ち上げ成功！」を二度言う画面になり、カードの裏に透けて汚れるため。
+   #cine 自体は index.html の持ち物なので、クラスの付け外しだけで触る。 */
+body.sdg-lfx-on #cine .ctext { opacity: 0; transition: opacity .18s ease; }
+
+/* ======================================================== 失敗（控えめ） */
+/* 成功と同じ大きさで見せない。落差そのものが成功を際立たせる。 */
+#sdg-lfx-ng {
+  position: fixed; left: 50%; top: 62%; transform: translate(-50%, 6px);
+  z-index: 240; display: none; pointer-events: none;
+  font-family: "Hiragino Sans", "Noto Sans JP", sans-serif;
+  padding: 9px 20px; border-radius: 12px;
+  background: rgba(13,18,32,.92); border: 1px solid rgba(224,93,93,.45);
+  box-shadow: 0 10px 34px rgba(0,0,0,.55);
+  color: #f0d3d3; font-size: 14px; letter-spacing: .06em;
+  opacity: 0; transition: opacity .22s ease, transform .22s ease;
+}
+#sdg-lfx-ng.on { display: block; opacity: 1; transform: translate(-50%, 0); }
+#sdg-lfx-ng b { color: var(--ng, #e05d5d); font-weight: 800; margin-right: 8px;
+                letter-spacing: .12em; }
+
+/* ============================================ prefers-reduced-motion 対応 */
+/* 動きは全部止めて、フェードだけにする。情報（Congrats! と獲得点）は必ず残す。 */
+@media (prefers-reduced-motion: reduce) {
+  #sdg-lfx .lfx-confetti,
+  #sdg-lfx .lfx-ring,
+  #sdg-lfx .lfx-rays { display: none; }
+  #sdg-lfx .lfx-glow { animation: none; opacity: .8; }
+  #sdg-lfx .lfx-card { animation: lfxFadeIn .28s ease-out forwards; }
+  #sdg-lfx .lfx-pts  { animation: lfxFadeIn .28s ease-out forwards; }
+  #sdg-lfx.dual .lfx-badge { animation: none; }
+  #sdg-lfx .lfx-pts .n { transition: none; }
+  #sdg-lfx.out { animation: lfxFadeOut .22s linear forwards; }
+  @keyframes lfxFadeIn  { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes lfxFadeOut { to { opacity: 0; } }
+}
+
+/* ------------------------------------------------------ 小さい画面での縮小 */
+@media (max-height: 760px), (max-width: 900px) {
+  #sdg-lfx .lfx-card { min-width: 280px; padding: 18px 36px 16px; }
+  #sdg-lfx .lfx-title { font-size: 48px; }
+  #sdg-lfx.dual .lfx-title { font-size: 54px; }
+  #sdg-lfx .lfx-pts .n { font-size: 44px; }
+  #sdg-lfx .lfx-sub { font-size: 16px; }
+}

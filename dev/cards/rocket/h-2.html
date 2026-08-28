@@ -1,0 +1,78 @@
+<!doctype html><meta charset='utf-8'>
+<style>
+@font-face { font-family: sys; src: local("Hiragino Sans"), local("Noto Sans JP"); }
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { width:816px; height:1110px; overflow:hidden;
+  font-family: sys, "Hiragino Sans", "Noto Sans JP", sans-serif; -webkit-font-smoothing:antialiased; }
+.card { position:relative; width:816px; height:1110px; overflow:hidden; color:#10151f; }
+.art { position:relative; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+.art-svg { width:74%; height:74%; filter: drop-shadow(0 10px 24px rgba(0,0,0,.35)); }
+.stars { position:absolute; inset:0; background-repeat:no-repeat; }
+.tag { display:inline-flex; align-items:center; gap:8px; font-weight:800; }
+.mono { font-variant-numeric: tabular-nums; }
+.klass-box { display:inline-block; height:20px; border-radius:3px; background:currentColor; }
+.art-img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+.art-fill { position:absolute; inset:0; width:100%; height:100%; display:block; }
+.art-credit { position:absolute; right:12px; bottom:8px; font-size:16px; z-index:2;
+              color:rgba(255,255,255,.78); text-shadow:0 1px 4px rgba(0,0,0,.9); }
+
+.card { background:#eef0f6; }
+.frame { position:absolute; inset:26px; border:6px solid #D7263D; border-radius:16px; background:#fffdf9;
+         box-shadow: inset 0 0 0 3px rgba(0,0,0,.06); display:flex; flex-direction:column; overflow:hidden; }
+.head { background:linear-gradient(100deg,#D7263D,#D7263Dcc); color:#fff; padding:16px 20px 14px;
+        display:flex; align-items:center; gap:14px; }
+.head .mk { font-size:32px; }
+.head .emblem { width:58px; height:58px; flex:0 0 auto; filter: drop-shadow(0 2px 5px rgba(0,0,0,.3)); }
+.head .nm { font-size:44px; font-weight:800; flex:1; letter-spacing:.01em; }
+.head .cost { background:#fff; color:#D7263D; font-size:34px; font-weight:800;
+              padding:4px 16px; border-radius:26px; line-height:1.25; }
+.head .cost small { font-size:20px; }
+.type { display:flex; justify-content:space-between; align-items:center; padding:9px 22px;
+        background:#f1eee6; font-size:23px; font-weight:700; color:#3b3527; }
+.art { height:521px; background:linear-gradient(160deg,#0a1330,#1b2b5e 55%,#D7263D); }
+.chips { display:flex; gap:12px; padding:16px 18px 4px; }
+.chip { flex:1; background:#f4f1e7; border:2px solid #e7e1d2; border-radius:16px;
+        padding:9px 4px 10px; text-align:center; }
+.chip .ic { font-size:27px; line-height:1.1; }
+.chip .vl { font-size:44px; font-weight:800; color:#D7263D; line-height:1.15; }
+.chip .vl.pw { font-size:30px; letter-spacing:-.02em; }
+.chip .lb { font-size:18px; color:#6a6252; font-weight:700; }
+.flavor { margin:12px 20px 0; padding:12px 15px; background:#f6f2e6; border-left:8px solid #D7263D;
+          font-size:23px; line-height:1.45; color:#3b3527; }
+.sp { flex:1; }
+.foot { display:flex; justify-content:space-between; padding:8px 22px 14px;
+        font-size:19px; color:#7a7364; }
+</style>
+<div class="card"><div class="frame">
+  <div class="head">
+<svg viewBox="0 0 64 64" class="emblem">
+  <circle cx="32" cy="32" r="29" fill="rgba(255,255,255,.14)" stroke="#fff" stroke-width="2.5"/>
+  <ellipse cx="32" cy="32" rx="26" ry="10" fill="none" stroke="#fff" stroke-width="1.6"
+           opacity=".55" transform="rotate(-24 32 32)"/>
+  <circle cx="54" cy="21" r="2.6" fill="#fff" opacity=".9"/>
+  <circle cx="32" cy="30" r="11" fill="#fff"/>
+</svg><span class="nm">H-II</span>
+    <span class="cost mono">200<small>億</small></span></div>
+  <div class="type"><span>ロケット｜日本</span>
+    <span>★★☆☆ 世代2</span></div>
+  <div class="art">
+<svg viewBox="0 0 200 300" class="art-svg">
+  <defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#ffffff" stop-opacity=".95"/>
+    <stop offset="100%" stop-color="#D7263D" stop-opacity=".55"/></linearGradient></defs>
+  <path d="M100 18 C126 56 138 96 138 140 L138 214 L62 214 L62 140 C62 96 74 56 100 18 Z" fill="url(#g1)"/>
+  <path d="M62 150 L26 226 L62 214 Z" fill="#D7263D" opacity=".85"/>
+  <path d="M138 150 L174 226 L138 214 Z" fill="#D7263D" opacity=".85"/>
+  <rect x="78" y="214" width="44" height="26" rx="4" fill="#D7263D" opacity=".9"/>
+  <circle cx="100" cy="112" r="15" fill="#D7263D" opacity=".75"/>
+  <path d="M84 240 C92 268 108 268 116 240 C110 284 90 284 84 240 Z" fill="#FFB648" opacity=".9"/>
+</svg></div>
+  <div class="chips">
+    <div class="chip"><div class="ic">📦</div><div class="vl">L</div><div class="lb">大型</div></div>
+    <div class="chip"><div class="ic">🚀</div>
+      <div class="vl ">1機</div><div class="lb">同時打上</div></div>
+    <div class="chip"><div class="ic">🎯</div><div class="vl pw">71%</div><div class="lb">実績成功率</div></div>
+  </div>
+  <div class="flavor">初の全段国産。高性能だが高価で落ちた</div><div class="sp"></div>
+  <div class="foot"><span>派生元: H-I</span><span class="mono">LEO 10.1 t／実績 5/7 (71%)</span></div>
+</div></div>
