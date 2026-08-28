@@ -98,11 +98,19 @@
     root.querySelector('h3').textContent = `${i + 1} / ${SCENES.length}　${sc.title}`;
     const stage = root.querySelector('.stage');
     if (sc.video) {
-      stage.innerHTML = `<video src="assets/rules/${sc.video}" autoplay muted playsinline loop></video>`;
+      // webm(VP9) を優先し、再生できない環境（iOS Safari 17.4 未満など）は mp4(H.264) に落とす
+      const base = 'assets/rules/' + sc.video.replace(/\.webm$/, '');
+      stage.innerHTML = `<video autoplay muted playsinline loop>
+        <source src="${base}.webm" type="video/webm">
+        <source src="${base}.mp4" type="video/mp4"></video>`;
       const v = stage.querySelector('video');
-      // 動画が再生できない環境ではSVG/文字にフォールバックして空白を作らない
-      v.onerror = () => stage.innerHTML = `<div style="padding:40px;text-align:center">
+      // 動画が再生できない環境ではSVG/文字にフォールバックして空白を作らない。
+      // <source> 方式では error が video ではなく最後の <source> に飛ぶので、両方に張る。
+      const fail = () => stage.innerHTML = `<div style="padding:40px;text-align:center">
         <div style="font-size:26px;font-weight:800;color:#f2c14e">${sc.title}</div></div>`;
+      v.onerror = fail;
+      const last = stage.querySelector('source:last-of-type');
+      if (last) last.onerror = fail;
       v.play().catch(() => {});
     } else {
       stage.innerHTML = SVG[sc.svg];
