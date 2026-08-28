@@ -172,6 +172,34 @@
   const shortName = n => String(n || '').replace(/（.*/, '');
   const policyOf = p => (p && p.policy && p.policy !== 'あなた') ? p.policy : '';
 
+  /* ---- アバター（avatars.js）。未読込みでも従来どおり動くよう、必ず素通りできる形にする ---- */
+  const AV = () => (window.SDG && window.SDG.avatar) || null;
+
+  /** 顔。wrapCls は置き場所のサイズを持つ枠（.cdg-avw / .cdg-rav） */
+  function avHTML(p, wrapCls, mood) {
+    const a = AV();
+    if (!a) return '';
+    let s = '';
+    try { s = a.svg(p, {mood: mood}); } catch (_) { return ''; }
+    return s ? `<span class="${wrapCls}">${s}</span>` : '';
+  }
+
+  /** 表示用コールサイン（engine 側の name は変えない。あくまで表示の添え物） */
+  function callHTML(p) {
+    const a = AV();
+    if (!a) return '';
+    let c = '';
+    try { c = a.name(p); } catch (_) { return ''; }
+    return c ? `<span class="cdg-call">${esc(c)}</span>` : '';
+  }
+
+  /** あなたとの点差で表情の気配を決める（勝っていれば強気、負けていれば渋い顔） */
+  function moodOf(p, me) {
+    if (!p || !me || p === me) return null;
+    if (p.score === me.score) return null;
+    return p.score > me.score ? 'up' : 'down';
+  }
+
   function deltaHTML(label, from, to, unit) {
     const d = to - from;
     const cls = d > 0 ? 'up' : (d < 0 ? 'dn' : 'flat');
@@ -184,7 +212,7 @@
 
   const MAX_ACTS = 7;      // 1画面に収めるための上限（超過は「ほかN件」）
 
-  function colHTML(p, from, items) {
+  function colHTML(p, from, items, mood) {
     const list = items || [];
     const shown = list.slice(0, MAX_ACTS);
     const rest = list.length - shown.length;
@@ -211,7 +239,11 @@
        <span class="cdg-tx"><span class="cdg-bd">動きなし（手札も資金も動かさず）</span></span></li>`;
     return `<div class="cdg-col">
       <div class="cdg-hd">
-        <span class="cdg-nm">${esc(shortName(p.name))}</span>
+        ${avHTML(p, 'cdg-avw', mood)}
+        <span class="cdg-id">
+          <span class="cdg-nm">${esc(shortName(p.name))}</span>
+          ${callHTML(p)}
+        </span>
         ${policyOf(p) ? `<span class="cdg-pol">${esc(p.policy)}</span>` : ''}
       </div>
       <ul class="cdg-acts">${rows || empty}${more}</ul>
@@ -256,9 +288,13 @@
   }
 
   function rankHTML(standings) {
+    // standings は {name, score, money} しか持たないが、avatars.js が name から
+    // 席と policy を復元するので、そのまま渡してよい
+    const me = (standings || []).find(q => shortName(q.name) === 'あなた') || null;
     return (standings || []).map((q, i) => `
       <div class="cdg-r${shortName(q.name) === 'あなた' ? ' me' : ''}">
         <span class="cdg-rk">${i + 1}</span>
+        ${avHTML(q, 'cdg-rav', moodOf(q, me))}
         <span class="cdg-rn">${esc(shortName(q.name))}</span>
         <span class="cdg-rs">${q.score}<i>点</i></span>
         <span class="cdg-rm">${q.money}<i>億</i></span>
@@ -326,8 +362,10 @@
     const {acts, story} = parseLines(ev.lines, ev.from_year);
     const fromOf = i => before.find(b => b.i === i) || {score: 0, money: 0};
 
+    const meNow = after.find(p => p.i === 0) || null;
     const cols = after.filter(p => p.i !== 0)
-                      .map(p => colHTML(p, fromOf(p.i), acts[p.i])).join('');
+                      .map(p => colHTML(p, fromOf(p.i), acts[p.i], moodOf(p, meNow)))
+                      .join('');
     // 見出しは from_year/to_year ではなく「実際にCPUが動いた年」で決める。
     // 年の見出しはCPUが動かなくてもログに出るため、それを根拠にすると
     // 中身が1年分しかないのに「2年分」と書いてしまう。

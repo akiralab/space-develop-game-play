@@ -38,6 +38,9 @@
 
 /* ------------------------------------------------------------------ 見出し */
 #sdg-digest .cdg-head {
+  /* .cdg-note は flex:1 0 100% で単独行に落とすため、折り返しを許可する。
+     これが無いと見出しの他の要素が min-content まで潰れてタイトルが縦書きになる。 */
+  flex-wrap: wrap;
   display: flex; align-items: baseline; gap: 12px; flex: 0 0 auto;
   padding-bottom: 8px; border-bottom: 1px solid var(--line, #2a3355);
 }

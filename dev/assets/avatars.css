@@ -1,0 +1,79 @@
+/* avatars.css — CPUアバター（avatars.js が返すインラインSVG）の見せ方
+ *
+ * ここには「アバターそのもの」と「アバターを置く場所の枠」だけを書く。
+ * ダイジェストのレイアウト本体は cpu_digest.css が持っている。
+ * 配色トークンは board.css に合わせる（--dim #96a0c0 / --acc #f2c14e / --line #2a3355）。
+ *
+ * 1画面（.cdg-panel は max-height:92vh）に収めるのが最優先なので、
+ * 顔は「行の高さを少しだけ増やす」サイズに留め、画面が低いときはさらに縮める。
+ */
+
+/* ------------------------------------------------------------ アバター本体 */
+.sdg-av {
+  display: block; width: 100%; height: 100%;
+  border-radius: 50%;
+  /* 小さくても輪郭が背景に溶けないよう、ごく薄い外周の影を足す */
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .55));
+}
+/* 勝っている／負けているの気配。表情差分（眉・口）と合わせて効かせる */
+.sdg-av.is-up   { filter: drop-shadow(0 1px 3px rgba(76, 175, 130, .45)) saturate(1.12)
+                          brightness(1.06); }
+.sdg-av.is-down { filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .55)) saturate(.8)
+                          brightness(.92); }
+
+@media (prefers-reduced-motion: reduce) {
+  .sdg-av { transition: none !important; animation: none !important; }
+}
+
+/* --------------------------------------------- ダイジェストの列見出し（主戦場） */
+#sdg-digest .cdg-hd { gap: 8px; }
+
+#sdg-digest .cdg-avw {
+  flex: 0 0 auto; width: 30px; height: 30px;
+  border-radius: 50%;
+}
+/* 名前とコールサインの2段組。長い名前でも列の幅を押し広げない */
+#sdg-digest .cdg-id {
+  display: flex; flex-direction: column; min-width: 0;
+  line-height: 1.16;
+}
+#sdg-digest .cdg-id .cdg-nm {
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+#sdg-digest .cdg-call {
+  font-size: 9.5px; font-weight: 700; letter-spacing: .1em;
+  color: var(--dim, #96a0c0);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+#sdg-digest .cdg-call::before {
+  content: "CS"; margin-right: 4px; padding: 0 3px;
+  border-radius: 3px; font-size: 8px; letter-spacing: .06em;
+  color: var(--acc, #f2c14e);
+  background: rgba(242, 193, 78, .12);
+  border: 1px solid rgba(242, 193, 78, .28);
+}
+/* policy タグは右端へ寄せる（顔＋2段組が入ったぶん、行が窮屈になるため） */
+#sdg-digest .cdg-hd .cdg-pol { margin-left: auto; flex: 0 0 auto; }
+
+/* ------------------------------------------------------- 下段の順位表（小） */
+#sdg-digest .cdg-r { align-items: center; gap: 6px; }
+#sdg-digest .cdg-rav {
+  flex: 0 0 auto; width: 18px; height: 18px;
+}
+#sdg-digest .cdg-r.me .cdg-rav { box-shadow: 0 0 0 1px rgba(242, 193, 78, .45); border-radius: 50%; }
+
+/* ------------------------------------------ 低い画面（1280x800 以下）では縮める */
+@media (max-height: 820px) {
+  #sdg-digest .cdg-avw { width: 27px; height: 27px; }
+  #sdg-digest .cdg-call { font-size: 9px; }
+  #sdg-digest .cdg-rav { width: 16px; height: 16px; }
+}
+@media (max-height: 700px) {
+  #sdg-digest .cdg-avw { width: 24px; height: 24px; }
+  #sdg-digest .cdg-call::before { display: none; }
+  #sdg-digest .cdg-rav { width: 15px; height: 15px; }
+}
+/* 列が細いとき（狭い画面・4人以上）はコールサインの見出しだけ落とす */
+@media (max-width: 1000px) {
+  #sdg-digest .cdg-call::before { display: none; }
+}
