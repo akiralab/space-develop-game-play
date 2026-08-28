@@ -96,18 +96,22 @@
    * lines を「CPUごとの行動」と「課題の公開（因果つき）」に振り分ける。
    * @returns {{acts: Object<number, Array>, story: Array, years: Array<number>}}
    */
-  function parseLines(lines) {
+  function parseLines(lines, fromYear) {
     const acts = {};        // プレイヤー index -> 項目の配列
     const story = [];       // 課題の公開・回収の出来事
     const years = [];
     let lastSolve = null;   // 直前の「達成」。次に来る 🌏 の理由になる
+    // 手番順がローテーションするため、1回のダイジェストは「その年の残り」と
+    // 「次の年のはじめ」にまたがる。年を持たせないと、CPUが1年に2回開発したように
+    // 見えてしまう（実際はルールどおり1年2アクション・同一種類1回まで）。
+    let curYear = fromYear || null;
 
     for (const raw of lines || []) {
       const l = String(raw).replace(/^\n+/, '').trim();
       if (!l) continue;
       if (l.indexOf('**T') === 0) {            // 年の見出し
         const y = l.match(/^\*\*T(\d+)年目\*\*/);
-        if (y) years.push(Number(y[1]));
+        if (y) { years.push(Number(y[1])); curYear = Number(y[1]); }
         lastSolve = null;
         continue;
       }
@@ -135,6 +139,7 @@
       if (!pm) continue;
       const pi = Number(pm[1]) - 1;            // ログは P1 = 席1（あなた）
       const item = parseAction(pm[2]);
+      item.year = curYear;
       if (item.solved) lastSolve = {mission: item.solved, by: pi};
       else if (item.ic === '🚀' || item.ic === '🔧') lastSolve = null;
       (acts[pi] || (acts[pi] = [])).push(item);
@@ -183,13 +188,22 @@
     const list = items || [];
     const shown = list.slice(0, MAX_ACTS);
     const rest = list.length - shown.length;
-    const rows = shown.map(it => `
+    let prevYear = null;
+    const rows = shown.map(it => {
+      // 年をまたいだら仕切りを入れる（「1年に2回開発した」ように見えるのを防ぐ）
+      let sep = '';
+      if (it.year != null && prevYear != null && it.year !== prevYear) {
+        sep = `<li class="cdg-yr"><span>${it.year}年目</span></li>`;
+      }
+      if (it.year != null) prevYear = it.year;
+      return sep + `
       <li class="cdg-a${it.tone ? ' t-' + it.tone : ''}${it.big ? ' big' : ''}">
         <span class="cdg-ic">${it.ic}</span>
         <span class="cdg-tx">${it.head ? `<b>${esc(it.head)}</b>` : ''}${
           it.body ? `<span class="cdg-bd">${esc(it.body)}</span>` : ''}</span>
         ${it.tail ? `<span class="cdg-tl">${esc(it.tail)}</span>` : ''}
-      </li>`).join('');
+      </li>`;
+    }).join('');
     const more = rest > 0 ? `<li class="cdg-a t-dim"><span class="cdg-ic">…</span>
         <span class="cdg-tx"><span class="cdg-bd">ほか ${rest} 件</span></span></li>` : '';
     const empty = list.length ? '' :
@@ -309,13 +323,31 @@
     const before = ev.before || [];
     const after = ev.after || [];
     if (!after.length) return;
-    const {acts, story} = parseLines(ev.lines);
+    const {acts, story} = parseLines(ev.lines, ev.from_year);
     const fromOf = i => before.find(b => b.i === i) || {score: 0, money: 0};
 
     const cols = after.filter(p => p.i !== 0)
                       .map(p => colHTML(p, fromOf(p.i), acts[p.i])).join('');
-    const y0 = ev.from_year, y1 = ev.to_year;
-    const span = (y0 && y1 && y1 !== y0) ? `T${y0}年目 → T${y1}年目` : `T${y1 || y0 || ''}年目`;
+    // 見出しは from_year/to_year ではなく「実際にCPUが動いた年」で決める。
+    // 年の見出しはCPUが動かなくてもログに出るため、それを根拠にすると
+    // 中身が1年分しかないのに「2年分」と書いてしまう。
+    // アクションを消費するものだけを数える。搭載・即達成・設計寿命は無料処理で、
+    // 特に設計寿命は年明けに処理されるため、これを入れると常に「2年分」になってしまう。
+    const COSTS = {'🔧': 1, '🚀': 1, '🔄': 1, '💰': 1};
+    const yrs = [], allYrs = [];
+    for (const k of Object.keys(acts)) {
+      for (const it of acts[k]) {
+        if (it.year == null) continue;
+        if (allYrs.indexOf(it.year) < 0) allYrs.push(it.year);
+        if (COSTS[it.ic] && yrs.indexOf(it.year) < 0) yrs.push(it.year);
+      }
+    }
+    yrs.sort((a, b) => a - b);
+    allYrs.sort((a, b) => a - b);
+    const y0 = yrs.length ? yrs[0] : (allYrs[0] || ev.from_year);
+    const y1 = yrs.length ? yrs[yrs.length - 1] : (allYrs[allYrs.length - 1] || ev.to_year);
+    const crossed = yrs.length > 1;
+    const span = crossed ? `T${y0}年目のつづき → T${y1}年目のはじめ` : `T${y0 || ''}年目`;
 
     root.innerHTML = `
       <div class="cdg-panel" style="--cdg-n:${Math.max(1, after.length - 1)}">
@@ -323,6 +355,9 @@
           <div class="cdg-kick">CPU TURNS</div>
           <div class="cdg-ttl">あなたの手番のあと、CPUはこう動きました</div>
           <div class="cdg-year">${esc(span)}</div>
+          ${crossed ? `<div class="cdg-note">手番順はローテーションするため、この画面には
+            ${y0}年目の残りと ${y1}年目のはじめが並びます。1年にできるのは2アクションまで
+            （同じ種類は1回まで）で、CPUも同じ条件です。</div>` : ''}
           <div class="cdg-hint">クリックで進む ／ Esc で閉じる</div>
         </div>
         <div class="cdg-cols">${cols}</div>

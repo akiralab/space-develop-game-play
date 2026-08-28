@@ -676,7 +676,9 @@
     if (nPlayers >= 3) { for (var i = 2; i < nPlayers; i++) sniper.push(i); }
     else sniper = [1];
     var kw = {combine_free: true, actions_per_turn: 2, mission_board: 'serial',
-              serial_window: 3, rotate_start: true, lifetime: true, dual_launch: true,
+              // v0.2: あなた（席1）は常に先行。ローテーションだと1回のダイジェストに
+              // 2年分が混ざり、CPUが1年に2回開発したように見えるため（serve.py と同じ）
+              serial_window: 3, rotate_start: false, lifetime: true, dual_launch: true,
               verbose: true, sniper: sniper, serial_grace: grace != null ? grace : null};
     if (pkg) { kw.start_money = 300; kw.crit_pt = 2; }
     this.package = !!pkg;
@@ -715,9 +717,8 @@
       return;
     }
     this.g.begin_year(this.turn);
-    var order = this.g.players.slice();
-    var k = (this.turn - 1) % order.length;
-    this.order = order.slice(k).concat(order.slice(0, k));
+    // v0.2: あなた（席1）は常に先行。serve.py の Pilot.start_turn と同じ理由・同じ挙動。
+    this.order = this.g.players.slice();
     this.oi = 0;
     this.advance();
   };
