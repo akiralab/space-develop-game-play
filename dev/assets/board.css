@@ -30,7 +30,7 @@
 /* ---------------------------------------------------------------- 土台 */
 html { height: 100%; }
 body {
-  height: 100vh; overflow: hidden;
+  height: 100vh; height: 100dvh; overflow: hidden;
   padding: 9px 14px 8px;
   display: flex; flex-direction: column; gap: 8px;
   font-size: 13px;
@@ -282,11 +282,17 @@ body.exchanging #hand .cardbox:not(.pick) { opacity: .62; }
   transition: transform .15s ease, box-shadow .2s ease;
 }
 #endturn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 11px 30px rgba(242,193,78,.42); }
+/* 新規ゲーム（ヘッダ右側・ルール説明タブの左）。押すと確認ポップアップ #ngpop が出る */
 #newgame {
-  background: transparent; border: 1px solid rgba(42,51,85,.9); border-radius: 999px;
-  text-align: center; font-size: 10.5px; padding: 5px 8px; color: var(--dim);
+  margin-left: auto; display: inline-flex; align-items: center; gap: 7px;
+  font-family: inherit; font-size: 12.5px; font-weight: 700; letter-spacing: .06em;
+  color: var(--dim); background: rgba(29,37,64,.7); border: 1px solid var(--line);
+  border-radius: 9px; padding: 8px 13px; cursor: pointer;
+  transition: color .18s, border-color .18s, background .18s;
 }
-#newgame:hover { border-color: var(--ng); color: var(--ng); }
+#newgame:hover { border-color: var(--ng); color: var(--ng); background: rgba(224,104,95,.1); }
+#newgame .ic { font-size: 14px; }
+@media (max-width: 1200px) { #newgame .tx { display: none; } }
 
 /* 終局テーブル（ending.js が上に被さるまでの土台） */
 #actions.endpanel { display: block; max-height: 30vh; overflow: auto; }
@@ -473,7 +479,7 @@ button { transition: border-color .18s ease, background .18s ease, color .18s ea
 
 /* ヘッダの「ルール説明」タブ（ゲーム中いつでも開ける） */
 #rulesTab {
-  margin-left: auto; display: inline-flex; align-items: center; gap: 7px;
+  margin-left: 0; display: inline-flex; align-items: center; gap: 7px;
   font-family: inherit; font-size: 12.5px; font-weight: 700; letter-spacing: .06em;
   color: var(--dim); background: rgba(29,37,64,.7); border: 1px solid var(--line);
   border-radius: 9px; padding: 8px 15px; cursor: pointer;
