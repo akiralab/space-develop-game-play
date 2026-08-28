@@ -14,6 +14,7 @@ html, body { width:816px; height:1110px; overflow:hidden;
 .art-img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
 .art-fill { position:absolute; inset:0; width:100%; height:100%; display:block; }
 .art-credit { position:absolute; right:12px; bottom:8px; font-size:16px; z-index:2;
+              max-width:calc(100% - 24px); text-align:right; line-height:1.25;
               color:rgba(255,255,255,.78); text-shadow:0 1px 4px rgba(0,0,0,.9); }
 
 .card { background:#eef0f6; }
@@ -40,6 +41,13 @@ html, body { width:816px; height:1110px; overflow:hidden;
 .flavor { margin:12px 20px 0; padding:12px 15px; background:#f6f2e6; border-left:8px solid #E2711D;
           font-size:23px; line-height:1.45; color:#3b3527; }
 .sp { flex:1; }
+/* 出自の帯。教材として「どの国の・どこが作った・いつ飛んだ機体か」を
+   券面だけで分かるようにする（詳しい諸元は拡大時の解説パネル側）。 */
+.origin { display:flex; flex-wrap:wrap; gap:6px 14px; margin:12px 20px 0;
+          padding:10px 14px; background:#f1eee6; border-radius:10px; }
+.origin i { font-style:normal; font-size:19px; }
+.origin b { font-size:21px; font-weight:800; color:#3b3527; }
+.origin span { font-size:16px; color:#8a8272; font-weight:700; letter-spacing:.04em; }
 .foot { display:flex; justify-content:space-between; padding:8px 22px 14px;
         font-size:19px; color:#7a7364; }
 </style>
@@ -62,6 +70,7 @@ html, body { width:816px; height:1110px; overflow:hidden;
       <div class="vl ">1機</div><div class="lb">同時打上</div></div>
     <div class="chip"><div class="ic">🎯</div><div class="vl pw">98.7%</div><div class="lb">実績成功率</div></div>
   </div>
-  <div class="flavor">最後は100回連続成功で退役した働き者</div><div class="sp"></div>
+  <div class="flavor">最後は100回連続成功で退役した働き者</div>
+  <div class="origin"><i>🌐</i><span>国</span><b>米国</b><i>🏭</i><span>開発</span><b>マクダネル・ダグラス</b><i>🚀</i><span>初打上げ</span><b>1989年</b></div><div class="sp"></div>
   <div class="foot"><span>派生元: Delta 3000</span><span class="mono">LEO 2.8-6.1 t／実績 153/155 (98.7%)</span></div>
 </div></div>

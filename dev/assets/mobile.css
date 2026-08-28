@@ -209,7 +209,14 @@
     /* 上端は右上のミュートボタン（#sdg-mute・約44px）を避けて空ける */
     padding: calc(60px + var(--sa-t)) 12px calc(12px + var(--sa-b));
   }
-  html:not([data-desktop]) #modal .big { flex: 0 0 auto; }
+  /* --ms は宣言されていたが、適用先が無かった。券面が PC 幅（816×.6＝490px）の
+     ままで、390px 幅の端末では右がはみ出し、出自の帯と諸元の右端が切れていた。
+     .big の実寸と iframe の縮尺の両方に効かせる（両者がずれると余白か切れが出る）。 */
+  html:not([data-desktop]) #modal .big {
+    flex: 0 0 auto;
+    width: calc(816px * var(--ms)); height: calc(1110px * var(--ms));
+  }
+  html:not([data-desktop]) #modal iframe { transform: scale(var(--ms)); }
   html:not([data-desktop]) #minfo { width: auto; max-width: 100%; max-height: none; flex: 0 0 auto; }
   /* 閉じるボタン: .mwrap が画面いっぱいで背景をタップできないので、左上に固定で置く
      （右上はミュートボタン #sdg-mute）。端末の「戻る」でも閉じる（index.html の popstate） */

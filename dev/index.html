@@ -136,8 +136,7 @@
   (doc.head || doc.documentElement).appendChild(st);
 
   /* ------------------------------------------------------------------ DOM
-     head で走るので <body>
-<div id="devbadge">DEV — 検証用</div> はまだ無い。position:fixed なので documentElement の
+     head で走るので <body> はまだ無い。position:fixed なので documentElement の
      直下に置いてもレイアウトには影響しない。.neb は boot.css が後から色を乗せる箱。 */
   var root = doc.createElement('div');
   root.id = 'sdg-boot';
@@ -414,7 +413,13 @@
   #modal .mwrap { display:flex; gap:20px; align-items:stretch; cursor:default; }
   #modal .big { width:490px; height:666px; border-radius:14px; overflow:hidden; flex:0 0 auto; }
   #minfo { width:430px; background:var(--panel); border:1px solid var(--line); border-radius:14px;
-           padding:20px; overflow-y:auto; max-height:666px; }
+           padding:20px; overflow-y:auto; max-height:666px;
+           /* 諸元＋来歴は券面より縦に長い。スクロールバーを常に見える形にしておかないと、
+              「実機の諸元」の途中で切れているのに気づけず、ニュースと来歴まで読まれない。 */
+           scrollbar-width: thin; scrollbar-color:#55618a transparent; }
+  #minfo::-webkit-scrollbar { width:9px; }
+  #minfo::-webkit-scrollbar-track { background:rgba(255,255,255,.05); border-radius:5px; }
+  #minfo::-webkit-scrollbar-thumb { background:#55618a; border-radius:5px; }
   /* 実機の諸元・来歴（card_fx.js が assets/carddoc.json から差し込む） */
   #minfo .dochead { margin:14px 0 6px; font-size:11px; letter-spacing:.18em; color:var(--acc);
                     border-top:1px solid var(--line); padding-top:12px; }
@@ -522,6 +527,7 @@
 </style>
 </head>
 <body>
+<div id="devbadge">DEV — 検証用</div>
 <header class="top">
   <div class="brand">
     <span class="mk">🚀</span>
