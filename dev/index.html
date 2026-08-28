@@ -121,8 +121,7 @@
   (doc.head || doc.documentElement).appendChild(st);
 
   /* ------------------------------------------------------------------ DOM
-     head で走るので <body>
-<div id="devbadge">DEV — 検証用</div> はまだ無い。position:fixed なので documentElement の
+     head で走るので <body> はまだ無い。position:fixed なので documentElement の
      直下に置いてもレイアウトには影響しない。.neb は boot.css が後から色を乗せる箱。 */
   var root = doc.createElement('div');
   root.id = 'sdg-boot';
@@ -494,6 +493,7 @@
 </style>
 </head>
 <body>
+<div id="devbadge">DEV — 検証用</div>
 <header class="top">
   <div class="brand">
     <span class="mk">🚀</span>
