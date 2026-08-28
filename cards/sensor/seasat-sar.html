@@ -41,6 +41,13 @@ html, body { width:816px; height:1110px; overflow:hidden;
 .flavor { margin:12px 20px 0; padding:12px 15px; background:#f6f2e6; border-left:8px solid #3A3FA0;
           font-size:23px; line-height:1.45; color:#3b3527; }
 .sp { flex:1; }
+/* 出自の帯。教材として「どの国の・どこが作った・いつ飛んだ機体か」を
+   券面だけで分かるようにする（詳しい諸元は拡大時の解説パネル側）。 */
+.origin { display:flex; flex-wrap:wrap; gap:6px 14px; margin:12px 20px 0;
+          padding:10px 14px; background:#f1eee6; border-radius:10px; }
+.origin i { font-style:normal; font-size:19px; }
+.origin b { font-size:21px; font-weight:800; color:#3b3527; }
+.origin span { font-size:16px; color:#8a8272; font-weight:700; letter-spacing:.04em; }
 .foot { display:flex; justify-content:space-between; padding:8px 22px 14px;
         font-size:19px; color:#7a7364; }
 </style>
@@ -63,6 +70,7 @@ html, body { width:816px; height:1110px; overflow:hidden;
       <div class="vl ">3年</div><div class="lb">設計寿命</div></div>
     <div class="chip"><div class="ic">⚡</div><div class="vl pw">⚡2</div><div class="lb">消費電力</div></div>
   </div>
-  <div class="flavor">世界初の宇宙SAR。105日で沈黙した先駆者</div><div class="sp"></div>
+  <div class="flavor">世界初の宇宙SAR。105日で沈黙した先駆者</div>
+  <div class="origin"><i>🌐</i><span>国</span><b>米国</b><i>🛰</i><span>運用</span><b>NASA／JPL</b><i>🏭</i><span>製造</span><b>ロッキード</b><i>🚀</i><span>打上げ</span><b>1978年</b></div><div class="sp"></div>
   <div class="foot"><span>派生元: —</span><span class="mono">L帯 / 分解能 25 m / 幅 100 km／センサ質量 147 kg</span></div>
 </div></div>
