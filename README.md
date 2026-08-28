@@ -19,17 +19,19 @@
 | `?package=0` | 初期100億（既定は推奨パッケージの300億） |
 | `?seed=933` | 盤面の再現 |
 
-## 環境
-
-| | URL |
-|---|---|
-| 本番 | https://akiralab.github.io/space-develop-game-play/ |
-| 検証（DEV） | https://akiralab.github.io/space-develop-game-play/dev/ |
-
 ## これは何のリポジトリか
 
 **配信用のビルド成果物のみ**を置いています。
 ゲームデザイン・シミュレーションによるルール検証・カードジェネレータなどの
 開発リポジトリは別にあります。
 
-素材の出典とライセンスは [CREDITS.md](CREDITS.md) を参照してください。
+## ライセンスと権利表示
+
+| 対象 | 扱い |
+|---|---|
+| コード（HTML / CSS / JavaScript） | [LICENSE](LICENSE)（MIT） |
+| カードの諸元データ | [LICENSE](LICENSE) 内に併記（CC BY 4.0） |
+| 券面写真・音声などの第三者素材 | [CREDITS.md](CREDITS.md) — 素材ごとに提供元のライセンスが適用されます |
+
+第三者素材は MIT / CC BY の対象外です。再利用する場合は [CREDITS.md](CREDITS.md) の
+出典とライセンスを個別に確認してください。

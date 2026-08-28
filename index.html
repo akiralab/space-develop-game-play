@@ -2,22 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<script>
-/* モバイル対応のフラグ（CSS が最初のペイントから正しい側を選べるよう <head> で同期的に付ける）
-     ?desktop=1        → <html data-desktop>  … 幅に関係なく従来のPC版レイアウトに固定する逃げ道
-     タッチ主体の端末  → <html data-touch>    … 音声ゲート既定化など JS 側の分岐に使う
-   モバイル用の上書き CSS はすべて assets/mobile.css にあり、html:not([data-desktop]) 配下に置く。 */
-(function () {
-  try {
-    var h = document.documentElement, q = location.search;
-    if (/[?&]desktop=1/.test(q)) h.setAttribute('data-desktop', '');
-    var touch = /[?&]touch=1/.test(q) ||
-      ((navigator.maxTouchPoints || 0) > 0 && matchMedia('(hover: none)').matches);
-    if (touch && !/[?&]touch=0/.test(q)) h.setAttribute('data-touch', '');
-  } catch (_) {}
-})();
-</script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <script>
 /* boot.js — 打上前カウントダウン（初回ロードのローディング画面）
 
@@ -589,7 +574,6 @@
 <link rel="stylesheet" href="assets/cpu_digest.css">
 <link rel="stylesheet" href="assets/avatars.css">
 <link rel="stylesheet" href="assets/launch_fx.css">
-<link rel="stylesheet" href="assets/mobile.css">
 <script>
 /* ==== 拡張フック（演出モジュールはここ経由でのみ本体に触る） ====
    各モジュールは window.SDG.* に登録する。本体側のコードは書き換えない。 */
@@ -1199,17 +1183,10 @@ function openCardMenu(box, hi, kind, slug) {
     `<button type="button" class="cmb zoom"><b>🔍 券面を拡大して見る</b></button>`;
   document.body.appendChild(m);
   const r = box.getBoundingClientRect(), mr = m.getBoundingClientRect();
-  /* スマホ縦持ちでは手番パネル（#overlay）が画面下に固定されたボトムシートになる（mobile.css）。
-     その高さぶんを「使える下端」から差し引き、メニューがシートの下に潜らないようにする。 */
-  const ov = $('overlay');
-  const sheetH = (ov && getComputedStyle(ov).position === 'fixed') ? ov.getBoundingClientRect().height : 0;
-  const vw = window.innerWidth, vh = window.innerHeight - sheetH;
   let left = r.left + r.width / 2 - mr.width / 2;
-  left = Math.max(8, Math.min(left, vw - mr.width - 8));
-  let top = r.top - mr.height - 8;                                  // まずカードの上
-  if (top < 8) top = r.bottom + 8;                                  // 入らなければ下
-  if (top + mr.height > vh - 8) top = vh - mr.height - 8;           // それでも溢れるなら下端に寄せる
-  top = Math.max(8, top);                                           // 上端は必ず画面内
+  left = Math.max(8, Math.min(left, window.innerWidth - mr.width - 8));
+  let top = r.top - mr.height - 8;
+  if (top < 8) top = Math.min(r.bottom + 8, window.innerHeight - mr.height - 8);
   m.style.left = Math.round(left) + 'px';
   m.style.top = Math.round(top) + 'px';
   m.classList.add('on');
