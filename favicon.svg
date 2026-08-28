@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="13" fill="#0d1220"/>
+  <!-- 地球のリム -->
+  <circle cx="32" cy="72" r="34" fill="#1a4478"/>
+  <circle cx="32" cy="72" r="34" fill="none" stroke="#5b9bd5" stroke-width="1.6" opacity=".85"/>
+  <!-- 打ち上がる機体と光跡 -->
+  <path d="M32 12 c4.6 6 6.6 12 6.6 18 v8 h-13.2 v-8 c0-6 2-12 6.6-18 z" fill="#f2c14e"/>
+  <path d="M25.4 30 l-5.6 12 5.6-2 z" fill="#e0685f"/>
+  <path d="M38.6 30 l5.6 12 -5.6-2 z" fill="#e0685f"/>
+  <circle cx="32" cy="24" r="3.2" fill="#0d1220"/>
+  <path d="M29 40 q3 9 3 12 q0-3 3-12 z" fill="#fff" opacity=".85"/>
+</svg>

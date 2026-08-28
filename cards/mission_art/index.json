@@ -1,0 +1,13 @@
+{
+ "agri": "agri.jpg",
+ "climate": "climate.jpg",
+ "flood": "flood.jpg",
+ "forest": "forest.jpg",
+ "heat": "heat.jpg",
+ "infra": "infra.svg",
+ "mapping": "mapping.jpg",
+ "mineral": "mineral.jpg",
+ "subsidence": "subsidence.svg",
+ "vessel": "vessel.svg",
+ "water": "water.jpg"
+}
