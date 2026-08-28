@@ -206,14 +206,17 @@
     rng.shuffle(this.deck);
     var ms = missions.slice();
     rng.shuffle(ms);
-    this.missions = ms.slice(0, TURNS);      // 11枚から10枚
+    // v2.6: 直列モードは解決のたびに補充するため山札は全ミッション。
+    // 非直列は「年ごとに1枚」の設計なので従来どおり10枚に切る。
+    this.missions = this.serial ? ms : ms.slice(0, TURNS);
+    this.mission_discard = [];               // 解決済み。山札が尽きたら戻す
     this.players = [];
     var money = opt.start_money != null ? opt.start_money : START_MONEY;
     for (var q = 0; q < nPlayers; q++) this.players.push(new Player(q, money));
     this.draw_fail = 0;
     this.deck_min = this.deck.length;
     this.mission_answered = [];
-    for (var t = 0; t < TURNS; t++) this.mission_answered.push(false);
+    for (var t = 0; t < this.missions.length; t++) this.mission_answered.push(false);
     this.snapshots = {};
     this.log = [];
     for (var z = 0; z < this.players.length; z++) this.refill(this.players[z]);
@@ -258,7 +261,10 @@
     p.answered += 1;
     counterAdd(this.solves_by_pos, this.cur_pos);
     this.mission_answered[mi] = true;
-    this.solve_ages.push(turn - 1 - mi);
+    this.mission_discard.push(m);            // v2.6: 山札が尽きたら戻す
+    // 直列モードは mi ≠ 登場ターン-1 なので、公開ターンから経過年を測る
+    this.solve_ages.push(turn - (this.revealed_at[mi] != null
+                                 ? this.revealed_at[mi] : mi + 1));
     if (this.mission_board) {
       this.board = this.board.filter(function (km) { return km[0] !== mi; });
     }
@@ -273,7 +279,23 @@
     if (this.serial) this.reveal_next(turn);
   };
 
+  /* v2.6: 解決済みの課題をシャッフルして山札に戻す。
+     課題16枚に対し4人×10年では解決数が上回るため、これが無いと場が空になる。 */
+  Game.prototype.recycle_missions = function () {
+    if (!this.mission_discard.length) return false;
+    var back = this.mission_discard.slice();
+    this.rng.shuffle(back);
+    for (var i = 0; i < back.length; i++) {
+      this.missions.push(back[i]);
+      this.mission_answered.push(false);
+    }
+    this.mission_discard = [];
+    this.say('  ♻️ 解決済みの課題' + back.length + '件をシャッフルして山札に戻した');
+    return true;
+  };
+
   Game.prototype.reveal_next = function (turn) {
+    if (this.next_mi >= this.missions.length) this.recycle_missions();
     if (this.next_mi < this.missions.length) {
       var m = this.missions[this.next_mi];
       this.board.push([this.next_mi, m]);
@@ -576,7 +598,8 @@
 
   /** 年始処理: ミッション公開・設計寿命の退場。run() と対話UIの共用。 */
   Game.prototype.begin_year = function (turn) {
-    var mission = this.missions[turn - 1];
+    // 直列モードは場（board）で回すため year→mission の対応は使わない
+    var mission = turn - 1 < this.missions.length ? this.missions[turn - 1] : null;
     var i, p;
     if (this.serial) {
       if (turn === 1) {
@@ -653,7 +676,9 @@
     if (nPlayers >= 3) { for (var i = 2; i < nPlayers; i++) sniper.push(i); }
     else sniper = [1];
     var kw = {combine_free: true, actions_per_turn: 2, mission_board: 'serial',
-              serial_window: 3, rotate_start: true, lifetime: true, dual_launch: true,
+              // v0.2: あなた（席1）は常に先行。ローテーションだと1回のダイジェストに
+              // 2年分が混ざり、CPUが1年に2回開発したように見えるため（serve.py と同じ）
+              serial_window: 3, rotate_start: false, lifetime: true, dual_launch: true,
               verbose: true, sniper: sniper, serial_grace: grace != null ? grace : null};
     if (pkg) { kw.start_money = 300; kw.crit_pt = 2; }
     this.package = !!pkg;
@@ -692,9 +717,8 @@
       return;
     }
     this.g.begin_year(this.turn);
-    var order = this.g.players.slice();
-    var k = (this.turn - 1) % order.length;
-    this.order = order.slice(k).concat(order.slice(0, k));
+    // v0.2: あなた（席1）は常に先行。serve.py の Pilot.start_turn と同じ理由・同じ挙動。
+    this.order = this.g.players.slice();
     this.oi = 0;
     this.advance();
   };
@@ -720,9 +744,19 @@
     this.start_turn();
   };
 
+  /** 全席の得点・資金のスナップショット。CPUダイジェストの差分表示に使う。 */
+  Pilot.prototype.snap_players = function () {
+    var self = this;
+    return this.g.players.map(function (q) {
+      return {i: q.i, name: self.name(q.i), policy: self.policies[q.i],
+              score: q.score, money: q.money};
+    });
+  };
+
   Pilot.prototype.end_turn = function () {
     var g = this.g, p = this.human();
     var log0 = g.log.length, h0 = p.hand.length;
+    var before = this.snap_players(), year0 = this.turn;
     g.refill(p);
     if (p.hand.length > h0) {
       this.events.push({kind: 'refill', draw: p.hand.length - h0,
@@ -733,8 +767,12 @@
     this.advance();
     var cpuLines = g.log.slice(log0);
     if (cpuLines.length) {
+      // before/after と年の範囲を添える。ログ文字列だけだと各CPUの得点・資金の
+      // 「増減」が読み取れず、ダイジェスト側で推測することになるため。
       this.events.push({kind: 'cpu', lines: cpuLines,
-                        money: 0, score: 0, draw: 0, dice: null});
+                        money: 0, score: 0, draw: 0, dice: null,
+                        before: before, after: this.snap_players(),
+                        from_year: year0, to_year: Math.min(this.turn, TURNS)});
     }
   };
 

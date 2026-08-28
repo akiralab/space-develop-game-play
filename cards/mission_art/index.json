@@ -3,11 +3,16 @@
  "climate": "climate.jpg",
  "flood": "flood.jpg",
  "forest": "forest.jpg",
+ "glacier": "glacier.svg",
  "heat": "heat.jpg",
+ "ice": "ice.svg",
  "infra": "infra.svg",
+ "landuse": "landuse.svg",
  "mapping": "mapping.jpg",
  "mineral": "mineral.jpg",
  "subsidence": "subsidence.svg",
  "vessel": "vessel.svg",
- "water": "water.jpg"
+ "volcano": "volcano.svg",
+ "water": "water.jpg",
+ "wildfire": "wildfire.svg"
 }

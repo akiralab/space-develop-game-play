@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" class="art-fill" viewBox="0 0 752 366" preserveAspectRatio="xMidYMid slice">
+<svg xmlns="http://www.w3.org/2000/svg" class="art-fill"
+     viewBox="0 0 752 366" preserveAspectRatio="xMidYMid slice">
   <defs>
     <linearGradient id="sea" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0%" stop-color="#16283f"/><stop offset="100%" stop-color="#0a1524"/>

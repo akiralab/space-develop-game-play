@@ -38,7 +38,7 @@
  "h3": {
   "t": "rocket",
   "name": "H3-24",
-  "flavor": "単価を三分の一へ。まだ実績を積んでいる最中",
+  "flavor": "単価を半分へ。まだ実績を積んでいる最中",
   "payload": 16.0,
   "rate": 78.0,
   "cost": 50,
@@ -62,9 +62,9 @@
  "atlas-5": {
   "t": "rocket",
   "name": "Atlas V 401",
-  "flavor": "全打上成功。米国で最も長く現役を続けた",
+  "flavor": "型番が仕様書。米国の主力を20年以上務めた",
   "payload": 18.8,
-  "rate": 100.0,
+  "rate": 99.1,
   "cost": 150,
   "klass": "L",
   "gen": 3,
@@ -110,7 +110,7 @@
  "soyuz-u": {
   "t": "rocket",
   "name": "Soyuz-U",
-  "flavor": "786機。史上最も多く飛んだロケット",
+  "flavor": "786機。単一型式で史上最多を飛んだ",
   "payload": 6.9,
   "rate": 97.3,
   "cost": 50,
@@ -225,7 +225,7 @@
  "seasat-sar": {
   "t": "sensor",
   "name": "Seasat",
-  "flavor": "世界初の宇宙SAR。110日で沈黙した先駆者",
+  "flavor": "世界初の宇宙SAR。105日で沈黙した先駆者",
   "sensorName": "SAR",
   "band": "SAR",
   "res": 25.0,

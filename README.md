@@ -19,6 +19,13 @@
 | `?package=0` | 初期100億（既定は推奨パッケージの300億） |
 | `?seed=933` | 盤面の再現 |
 
+## 環境
+
+| | URL |
+|---|---|
+| 本番 | https://akiralab.github.io/space-develop-game-play/ |
+| 検証（DEV） | https://akiralab.github.io/space-develop-game-play/dev/ |
+
 ## これは何のリポジトリか
 
 **配信用のビルド成果物のみ**を置いています。

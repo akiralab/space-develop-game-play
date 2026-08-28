@@ -6,6 +6,26 @@
   let SPEC = {};
   fetch('assets/specs.json').then(r => r.json()).then(s => SPEC = s).catch(() => {});
 
+  // 実機の諸元と来歴（data/*.csv → tools/build_carddoc.py が生成）。
+  // 無くても比較バーだけで成立するよう、読めなければ黙って諦める。
+  let DOC = {};
+  fetch('assets/carddoc.json').then(r => r.json()).then(d => DOC = d).catch(() => {});
+
+  const esc = t => String(t).replace(/[&<>]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;'}[c]));
+
+  function docHtml(slug) {
+    const d = DOC[slug];
+    if (!d) return '';
+    let h = '';
+    if (d.specs && d.specs.length) {
+      h += '<div class="dochead">実機の諸元</div><table class="docspec">' +
+           d.specs.map(([k, v]) => `<tr><th>${esc(k)}</th><td>${esc(v)}</td></tr>`).join('') +
+           '</table>';
+    }
+    if (d.news) h += `<div class="docnews">${esc(d.news)}</div>`;
+    return h;
+  }
+
   // 全カード中の最大値（比較バーの正規化用）
   const maxOf = (t, k) => Math.max(...Object.values(SPEC)
     .filter(v => v.t === t && v[k] != null).map(v => v[k]), 1);
@@ -56,9 +76,18 @@
       const spec = info.querySelector('.spec');
       if (spec) spec.insertAdjacentHTML('afterend', bars);
       else info.querySelector('h3').insertAdjacentHTML('afterend', bars);
+
       // 次フレームで幅を入れてバーを伸ばす
       requestAnimationFrame(() => info.querySelectorAll('.fill')
         .forEach(f => f.style.width = f.dataset.w + '%'));
+    }
+    // 諸元表とニュースは、比較バーと来歴（.lore）のあいだに挟む。
+    // 比較バーが出せなくても（specs.json が読めない等）諸元だけは見せる。
+    const doc = docHtml(slug);
+    if (doc) {
+      const anchor = info.querySelector('.specbars') || info.querySelector('.spec')
+                     || info.querySelector('h3');
+      if (anchor) anchor.insertAdjacentHTML('afterend', doc);
     }
     // 音声解説ボタン（自動再生はしない＝テンポ優先）
     const vid = (kind === 'rocket' ? 'rkt_' : kind === 'sensor' ? 'sat_' : 'mission_') + slug;
