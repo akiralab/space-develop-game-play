@@ -47,19 +47,3 @@
   .sdg-nar2 .n2-mark,
   .sdg-nar2.talk .n2-mouth { animation: none !important; }
 }
-
-/* スマホ（縦持ち・幅700px以下）: 小さくして右下へ。盤面下部の固定アクションシート
-   （#overlay・約180px）に重ならない高さに置く。?desktop=1 のときは従来どおり。 */
-@media (max-width: 700px) {
-  html:not([data-desktop]) .sdg-nar2 {
-    width: 72px; right: max(10px, env(safe-area-inset-right));
-    bottom: calc(190px + env(safe-area-inset-bottom));
-  }
-}
-/* スマホ横持ち: さらに小さく、右下の隅へ */
-@media (max-width: 960px) and (max-height: 500px) {
-  html:not([data-desktop]) .sdg-nar2 {
-    width: 64px; right: max(10px, env(safe-area-inset-right));
-    bottom: calc(28px + env(safe-area-inset-bottom));
-  }
-}

@@ -178,7 +178,6 @@
   SDG.sfx.stopAll = stopAll;
   SDG.sfx.fadeOut = fadeOut;
   SDG.sfx.names = Object.keys(BANK);
-  SDG.sfx.unlock = unlock;     // title.js のゲート（タップして開始）から同じ操作内で呼ぶ
 
   /* ?gate=1 用: ゲートを閉じてタイトル演出を流し直すとき、SEも張り直す。
      ゲート表示中に自動再生が拒否されてキューを使い切ってしまうため。 */

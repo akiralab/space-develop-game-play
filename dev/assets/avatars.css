@@ -77,7 +77,3 @@
 @media (max-width: 1000px) {
   #sdg-digest .cdg-call::before { display: none; }
 }
-/* スマホ（幅700px以下）: 1列積みになるので顔は少し小さめに、コールサインはそのまま */
-@media (max-width: 700px) {
-  html:not([data-desktop]) #sdg-digest .cdg-avw { width: 28px; height: 28px; }
-}
